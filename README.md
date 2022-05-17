@@ -21,16 +21,17 @@ El enlace del DOI de Zenodo del *dataset* generado en la práctica 1 es el sigui
 A continuación, se muestra en árbol la estructura del proyecto.
 
     .
-    ├── code                                      # carpeta con el código R
-    |   ├── real-estate.bib                       # bibliografía utilizada
-    |   └── real-estate-analysis.rmd              # código en RStudio
+    ├── code                                        # carpeta con el código R
+    |   ├── real-estate.bib                         # bibliografía utilizada
+    |   ├── real-estate-cleaning-analysis.rmd       # código en RStudio
+    |   └── uoc.png                                 # png para el informe final
     |
-    ├── data                                      # carpeta con los datasets
-    |   ├── real-estate-raw.csv                   # dataset de entrada (raw)
-    |   └── real-estate.csv                       # dataset final tras el preprocesado de datos
+    ├── data                                        # carpeta con los datasets
+    |   ├── real-estate-raw.csv                     # dataset de entrada (raw)
+    |   └── real-estate.csv                         # dataset final tras el preprocesado de datos
     |
-    ├── agomezvarela_plazarotello-TIP_PRA2.pdf    # informe en PDF
-    ├── LICENSE                                   # licencia del código
-    └── README.md                                 # descripción del repositorio
+    ├── agomezvarela_plazarotello-TIP_PRA2.pdf      # informe en PDF
+    ├── LICENSE                                     # licencia del código
+    └── README.md                                   # descripción del repositorio
 
 ## Instrucciones de uso
