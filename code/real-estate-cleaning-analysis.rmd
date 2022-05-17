@@ -1,0 +1,328 @@
+---
+title: 'Limpieza y análisis de datos del mercado inmobiliario'
+author:
+  - Alba Gómez Varela
+  - Patricia Lázaro Tello
+date: ""
+lang: es
+fontsize: 12pt
+bibliography: real-estate.bib
+nocite: '@*'
+output: 
+  pdf_document:
+    keep_tex: false
+    latex_engine: "xelatex"
+    highlight: tango
+    df_print: default
+    number_section: yes
+    toc: no
+header-includes: |
+  \usepackage{amsmath}
+  \usepackage{amssymb}
+  \usepackage{xcolor}
+  \usepackage{graphicx}
+  \usepackage[font=footnotesize,labelfont=bf]{caption}
+  %\usepackage[hidelinks]{hyperref}
+  \usepackage{fontspec}
+  \usepackage{fancyhdr}
+  \usepackage{titling}
+  \usepackage{array}
+  \usepackage{multicol}
+  \usepackage{framed}
+  \usepackage{enumitem}
+  \usepackage{soul}
+  \usepackage{subcaption}
+  \usepackage{wrapfig}
+  \usepackage{listings}
+  \usepackage{layout}
+  \usepackage{polyglossia}
+  \usepackage{csquotes}
+  \setdefaultlanguage{spanish}
+  \usepackage[language=spanish, bibstyle=iso-authoryear, citestyle=verbose, sorting=nyt]{biblatex}
+  
+  \geometry{a4paper,top=2cm,left=3cm,right=1.5cm,marginparwidth=1.75cm}
+  
+  \definecolor{uocblue}{HTML}{000078}
+  \colorlet{uocresalt}{white!93!uocblue}
+  \sethlcolor{uocresalt}
+  \colorlet{main}{uocblue}
+  \setmainfont{Arial}[Color = uocblue]
+  \renewcommand{\labelitemi}{$\textcolor{uocblue}{\bullet}$}
+  \renewcommand{\labelitemii}{$\textcolor{uocblue}{\cdot}$}
+  \renewcommand{\labelitemiii}{$\textcolor{uocblue}{\diamond}$}
+  \renewcommand{\labelitemiv}{$\textcolor{uocblue}{\ast}$}
+  \renewcommand{\thefootnote}{\textbf{\arabic{footnote}}}
+  \renewcommand{\footnoterule}{{
+  		\color{uocblue}
+  		\kern 20pt
+  		\hrule width 2in
+  		\kern 3pt
+  }}
+  \setulcolor{uocblue}
+  
+  \setcounter{biburllcpenalty}{7000}
+  \setcounter{biburlucpenalty}{8000}
+  
+  \hypersetup{allcolors=uocblue}
+  \urlstyle{same}
+  
+  
+  \makeatletter
+  \def\@xobeysp{\mbox{}\space}
+  \def\verbatim@font{\color{uocblue}\footnotesize\ttfamily\raggedright}
+  \makeatother
+  
+  \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\small}
+  \renewcommand{\and}{\\}
+  
+  
+  %%%%%%%%%%%%%%%%%
+  \newcommand{\master}{Máster en Ciencia de Datos}
+  \newcommand{\grade}{2021/2022}
+  \newcommand{\subject}{Tipología y ciclo de vida del dato}
+  \newcommand{\testname}{\textbf{PRA2}}
+  \newcommand{\loginuocone}{agomezvarela@uoc.edu}
+  \newcommand{\loginuoctwo}{plazarotello@uoc.edu}
+  \newcommand{\authorone}{Alba Gómez Varela}
+  \newcommand{\authortwo}{Patricia Lázaro Tello}
+  \title{Limpieza y análisis de datos del mercado inmobiliario}
+  \author{Alba Gómez Varela\\Patricia Lázaro Tello}
+  \date{}	% quitar la fecha del titulo
+  %%%%%%%%%%%%%%%%%
+  
+  \pretitle{\vspace{-2cm}\begin{center}\LARGE \bfseries}
+  \posttitle{\end{center}}
+  \preauthor{\vspace{-0.0065cm}\begin{center}
+  		\large \itshape
+  		\begin{tabular}[t]{c}}
+  		\postauthor{\end{tabular}\end{center}\vspace{-1.5cm}}
+  		
+  
+  \fancypagestyle{uoc}{
+  \fancyhf{}
+  \fancyhead[C]{\includegraphics[width=16.5cm]{uoc.png}}
+  \fancyhead[R]{\footnotesize \hspace*{\fill}\authorone \space \space · \space \nolinkurl{\loginuocone}\\
+  	\hspace*{\fill}\authortwo \space \space \space · \space\space\space \nolinkurl{\loginuoctwo}\\ \vspace{-2pt}}
+  \fancyfoot[R]{\footnotesize \thepage} %\hspace{0.5cm}}
+  \fancyfoot[C]{\footnotesize \hspace{1.5cm} \grade}
+  \fancyfoot[L]{\footnotesize \subject \space · \testname\\
+  	\space\master}
+  \renewcommand{\headrulewidth}{0pt} % remove lines as well
+  \renewcommand{\footrulewidth}{0pt}
+  \setlength{\footskip}{50pt}%
+  \setlength{\headsep}{15pt}
+  \setlength{\headheight}{42pt}
+  \setlength{\parskip}{10pt}
+  \setlength{\topmargin}{-1cm}
+  %\setlength{\textheight}{\textheight}
+  \setlength{\textheight}{650pt}
+  \setlength{\oddsidemargin}{0pt}
+  \setlength{\marginparsep}{0pt}
+  \setlength{\marginparpush}{0pt}
+  \setlength{\voffset}{-10pt}
+  \setlength{\fboxsep}{0pt}
+  }
+  
+  \fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyhead[C]{\includegraphics[width=16.5cm]{uoc.png}}
+  \fancyhead[R]{\footnotesize \hspace*{\fill}\authorone \space \space · \space \nolinkurl{\loginuocone}\\
+  	\hspace*{\fill}\authortwo \space \space \space · \space\space\space \nolinkurl{\loginuoctwo}\\ \vspace{-2pt}}
+  \fancyfoot[R]{\footnotesize \thepage} %\hspace{0.5cm}}
+  \fancyfoot[C]{\footnotesize \hspace{1.5cm} \grade}
+  \fancyfoot[L]{\footnotesize \subject \space · \testname\\
+  	\space\master}
+  \renewcommand{\headrulewidth}{0pt} % remove lines as well
+  \renewcommand{\footrulewidth}{0pt}
+  \setlength{\footskip}{50pt}%
+  \setlength{\headsep}{15pt}
+  \setlength{\headheight}{42pt}
+  \setlength{\parskip}{10pt}
+  \setlength{\topmargin}{-1cm}
+  %\setlength{\textheight}{\textheight}
+  \setlength{\textheight}{650pt}
+  \setlength{\oddsidemargin}{0pt}
+  \setlength{\marginparsep}{0pt}
+  \setlength{\marginparpush}{0pt}
+  \setlength{\voffset}{-10pt}
+  \setlength{\fboxsep}{0pt}
+  }
+  
+  \pagestyle{uoc}
+  \linespread{1.125}
+  \color{uocblue}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = 'center', fig.height = 4, fig.width = 9, dpi = 256)
+options(scipen=99999, digits=2)
+knitr::knit_hooks$set(inline = function(x) {
+  if(!is.numeric(x)){x}
+  else{prettyNum(round(x,2), big.mark='.', decimal.mark=',')}
+  })
+
+# carga de librerias
+if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
+if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+if (!require('caret')) install.packages('caret'); library('caret')
+if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+if (!require('GGally')) install.packages('GGally'); library('GGally')
+if (!require('scales')) install.packages('scales'); library('scales')
+if (!require('RColorBrewer')) install.packages('RColorBrewer'); library('RColorBrewer')
+if(!require('ggpubr')) install.packages('ggpubr'); library('ggpubr')
+
+# definicion de colores
+default.color.main <- '#F8766D'
+default.color.secondary <- '#00BFC4'
+default.color.terciary <- '#7CAE00'
+default.color.quat <- '#6C25BE'
+default.color.cinq <- '#FFB800'
+default.color.six <- '#1C1D21'
+default.color.seven <- '#003049'
+default.color.eight <- '#8A2E3A'
+default.color.nine <- '#093824'
+
+# beautify plots
+ggally.dist.aes <- list(continuous=wrap('points', shape=21))
+palette <- c(default.color.main, default.color.secondary, 
+             default.color.terciary, default.color.quat,
+             default.color.cinq, default.color.six,
+             default.color.seven, default.color.eight, default.color.nine)
+palette.binary <- c(default.color.main, default.color.secondary)
+success.labeller <- ggplot2::as_labeller(c(`TRUE`='Éxito',
+                                           `FALSE`='Fracaso'))
+success.labeller.2 <- ggplot2::as_labeller(c(`1`='Éxito', `0`='Fracaso'))
+
+title.centered <- theme(
+  plot.title=element_text(face='bold', hjust=0.5, vjust=0.5, size=16),
+  plot.title.position='plot',
+  axis.title.x=element_text(size=12),
+  axis.title.y=element_text(size=12),
+  plot.subtitle=element_text(face='plain', hjust=0.5, vjust=0.5, size=11,
+                             colour='grey50')
+  )
+
+no.axis.y <- theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
+no.axis.x <- theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+# seed
+seed <- 50L
+set.seed(seed)
+```
+
+```{r bibliography, message=FALSE, warning=FALSE, include=FALSE}
+# Create bibliography for LaTeX
+bibliography <- c(
+  bibentry(bibtype='Book', author='Raul {Montoliu Colas}', 
+           title='Modelos supervisados', 
+           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284578', 
+           publisher='Universitat Oberta de Catalunya', 
+           urldate='2022-01-05', year=2021, key='book1'),
+  bibentry(bibtype='Book', author='Raul {Montoliu Colas}', 
+           title='Evaluacion de modelos', 
+           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284573', 
+           publisher='Universitat Oberta de Catalunya', 
+           urldate='2022-01-05', year=2021, key='book2'),
+  bibentry(bibtype='Book', author='Montserrat {Guillen Estany}, Maria Teresa {Alonso Alonso}', 
+           title='Modelos de regresion logistica', 
+           url='https://materials.campus.uoc.edu/daisy/Materials/PID_00276229/pdf/PID_00276229.pdf', 
+           publisher='Universitat Oberta de Catalunya', 
+           urldate='2022-01-05', year=2021, key='book3'),
+  bibentry(bibtype='Book', author='Jordi {Girones Roig}', 
+           title='Modelos no supervisados', 
+           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284572', 
+           publisher='Universitat Oberta de Catalunya', 
+           urldate='2022-01-05', year=2021, key='book4'),
+  
+  bibentry(bibtype='InBook', author='Ruben {Fernandez Casal}, Julian {Costa Bouzas}, Manuel {Oviedo de la Fuente}', 
+           title='Arboles de decision', 
+           chapter='2',
+           booktitle='Aprendizaje estadistico',
+           publisher='unknown',
+           url='https://rubenfcasal.github.io/aprendizaje_estadistico/trees.html',
+           date='2021-10-13', urldate='2022-01-05', year=2020, key='ib1'),
+  
+  bibentry(bibtype='InBook', author='Fernando {Villalba}', 
+           title='Regresion logistica binaria', 
+           chapter='6',
+           booktitle='Aprendizaje supervisado en R',
+           publisher='unknown',
+           url='https://fervilber.github.io/Aprendizaje-supervisado-en-R/glm.html',
+           date='2018-10-01', urldate='2022-01-05', year=2020, key='ib2'),
+  
+  bibentry(bibtype='InBook', author='Fernando {Villalba}', 
+           title='Arboles de decision', 
+           chapter='7',
+           booktitle='Aprendizaje supervisado en R',
+           publisher='unknown',
+           url='https://fervilber.github.io/Aprendizaje-supervisado-en-R/arboles.html',
+           date='2018-10-01', urldate='2022-01-05', year=2020, key='ib3'),
+  
+  bibentry(bibtype='Article', author='Ekta Sharma', 
+           title='K-Means vs. DBSCAN Clustering - For Beginners', 
+           journal='Towards Data Science',
+           url='https://towardsdatascience.com/k-means-vs-dbscan-clustering-49f8e627de27',
+           date='2020-05-27', urldate='2022-01-05', year=2020, key='art1'),
+  bibentry(bibtype='Article', author='Soroush Hashemifar', 
+           title='K-KMeans vs. DBScan', 
+           journal='Medium',
+           url='https://soroushhashemifar.medium.com/kmeans-vs-dbscan-d9d5f9dbee8b',
+           date='2018-04-02', urldate='2022-01-05', year=2018, key='art2'),
+  bibentry(bibtype='Article', author='Fisseha Berhane', 
+           title='Data distributions where Kmeans clustering fails', 
+           journal='Data Science Enthusiast',
+           url='https://datascience-enthusiast.com/Python/DBSCAN_Kmeans.html',
+           urldate='2022-01-05', year=2021, key='art3'),
+  bibentry(bibtype='Article', author='Indraneel Dutta Baruah', 
+           title='K-means, DBSCAN, GMM, Agglomerative clustering - Mastering the popular models in a segmentation problem', 
+           journal='Towards Data Science',
+           url='https://towardsdatascience.com/k-means-dbscan-gmm-agglomerative-clustering-mastering-the-popular-models-in-a-segmentation-c891a3818e29',
+           date='2020-11-08', urldate='2022-01-05', year=2020, key='art4'),
+  
+  bibentry(bibtype='Article', author='Kamil Mysiak', 
+           title='Explaining DBSCAN Clustering', 
+           journal='Towards Data Science',
+           url='https://towardsdatascience.com/explaining-dbscan-clustering-18eaf5c83b31',
+           date='2020-07-16', urldate='2022-01-05', year=2020, key='art5'),
+  
+  bibentry(bibtype='Article', author='Avinash Navlani', 
+           title='Neural Network Models in R', 
+           journal='Datacamp Tutorials',
+           url='https://www.datacamp.com/community/tutorials/neural-network-models-r',
+           date='2019-12-09', urldate='2022-01-05', year=2019, key='art6')
+)
+bib.file <- file('real-estate.bib')
+writeLines(toBibtex(bibliography), bib.file, useBytes=TRUE)
+close(bib.file)
+
+rm(bibliography, bib.file)
+```
+
+
+# Introducción
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+\newpage
+
+# Bibliografía
