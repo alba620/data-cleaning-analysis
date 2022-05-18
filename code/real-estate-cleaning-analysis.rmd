@@ -74,7 +74,7 @@ header-includes: |
   \def\verbatim@font{\color{uocblue}\footnotesize\ttfamily\raggedright}
   \makeatother
   
-  %\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\small}
+  \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\small}
   \renewcommand{\and}{\\}
   
   
@@ -111,13 +111,13 @@ header-includes: |
   	\space\master}
   \renewcommand{\headrulewidth}{0pt} % remove lines as well
   \renewcommand{\footrulewidth}{0pt}
-  \setlength{\footskip}{50pt}%
+  \setlength{\footskip}{20pt}%
   \setlength{\headsep}{15pt}
   \setlength{\headheight}{42pt}
   \setlength{\parskip}{10pt}
   \setlength{\topmargin}{-1cm}
   %\setlength{\textheight}{\textheight}
-  \setlength{\textheight}{650pt}
+  \setlength{\textheight}{680pt}
   \setlength{\oddsidemargin}{0pt}
   \setlength{\marginparsep}{0pt}
   \setlength{\marginparpush}{0pt}
@@ -165,6 +165,7 @@ knitr::knit_hooks$set(inline = function(x) {
   })
 
 # carga de librerias
+if (!require('tidyverse')) install.packages('tidyverse'); library('tidyverse')
 if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 if (!require('caret')) install.packages('caret'); library('caret')
@@ -222,6 +223,69 @@ set.seed(seed)
 # Introducción y descripción del *dataset*
 
 # Integración y selección de datos
+
+En primer lugar, se procede a cargar los datos *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022 para la práctica 1 de esta asignatura.
+
+```{r}
+houses.raw <- read.csv('../data/real-estate-raw.csv', header=TRUE, sep=',', 
+                       stringsAsFactors=FALSE, fileEncoding='UTF-8')
+houses.raw.dim <- dim(houses.raw)
+```
+
+Se han cargado `r houses.raw.dim[1]` registros con `r houses.raw.dim[2]` campos asociados a cada registro. Se procede a mostrar los nombres de los campos y un ejemplo para comprender mejor la estructura del conjunto de datos original:
+
+```{r include=FALSE}
+peek.dataset <- function(dataset){
+  for (col in names(dataset)) {
+    example = as.character(dataset[1,col])
+    if(nchar(example) > 50){
+      example = paste0(substr(example, start=1, stop=50), '...')
+    }
+    cat(paste0('Campo ', col, ' (', class(dataset[1,col]), '): ', example, '\n'))
+  }
+}
+```
+
+```{r}
+peek.dataset(houses.raw)
+```
+Se observa que todos los campos se han codificado como cadenas de caracteres. Este será uno de los primeros errores a corregir, pero por motivos de optimización del tiempo y eficiencia, se ha decidido seleccionar primero el subconjunto de campos con el que se trabajará a lo largo de este estudio. Se listan a continuación cada campo, una breve descripción del mismo y si se selecciona o no, así como los motivos que llevan a su descarte.
+
+- **id**: identificador numérico para cada registro. Actúa como identificador único junto al campo *source*. Se decide mantener los campos identificadores.
+- **url**: enlace a la páginna de venta del piso. Se descarta debido a que no se puede obtener más información de la ya obtenida en la práctica anterior.
+- **title**: título del anuncio. Se descarta por no ofrecer información adicional.
+- **location**: barrio en que se encuentra el piso anunciado. Puede ofrecer información relevante sobre la variabilidad de precios en el mercado inmobiliario y permite agrupar los anuncios por zonas.
+- **price**: precio en euros. Es la variable objetivo.
+- **m2**: metros cuadrados del piso. Permite distinguir entre pisos pequeños y grandes.
+- **rooms**: número de habitaciones del piso. Junto a **m2** permite distinguir las dimensiones del piso.
+- **floor**: altura a la que se encuentra el piso. Es posible que pisos más altos tengan un mayor valor de mercado.
+- **num.photos**: número de fotos que acompañan al anuncio. Se puede analizar si existe correlación entre algún tipo de vivienda (pisos caros, baratos, con peores o mejores características) y el número de fotos.
+- **floor.plan**: valor lógico que indica si se ha adjuntado el plano de la casa al anuncio.
+- **view3d**: valor lógico que indica si el anuncio cuenta con la característica de visión en 3D.
+- **video**: valor lógico que indica si el anuncio cuenta con un vídeo del piso.
+- **home.staging**: valor lógico que indica si el anuncio cuenta con la característica de *home staging*.
+- **description**: descripción del cuerpo del anuncio. Se mantiene en el *dataset* para ser analizada en mayor profundidad mediante análisis de textos.
+- **photo_urls**: lista de los enlaces de las fotografías adjuntas al anuncio. Se descarta por no realizar un análisis de las fotografías.
+- **source**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del identificador único de cara registro.
+
+```{r}
+selected.houses <- houses.raw %>% dplyr::select(-url, -title, -photo_urls) %>%
+  dplyr::mutate(id=as.integer(id), location=as.factor(location),
+                price=as.integer(str_remove_all(price, '\\.')),m2=as.integer(m2), 
+                rooms=as.integer(rooms),floor=as.factor(floor), 
+                num.photos=as.integer(num.photos), 
+                floor.plan=as.logical(as.integer(floor.plan)),
+                view3d=as.logical(as.integer(view3d)), 
+                video=as.logical(as.integer(video)),
+                home.staging=as.logical(as.integer(home.staging)),
+                source=as.factor(source))
+
+selected.houses.dim <- dim(selected.houses)
+
+peek.dataset(selected.houses)
+```
+
+El conjunto de datos con el que se trabajará durante el resto del estudio está compuesto de `r selected.houses.dim[1]` registros con `r selected.houses.dim[2]` campos por cada registro.
 
 # Limpieza de los datos
 
