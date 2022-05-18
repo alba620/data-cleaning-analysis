@@ -1,9 +1,11 @@
 ---
-title: 'Limpieza y análisis de datos del mercado inmobiliario'
+title: |
+  | Limpieza y análisis de datos
+  | del mercado inmobiliario
 author:
   - Alba Gómez Varela
   - Patricia Lázaro Tello
-date: ""
+date: ''
 lang: es
 fontsize: 12pt
 bibliography: real-estate.bib
@@ -38,7 +40,7 @@ header-includes: |
   \usepackage{polyglossia}
   \usepackage{csquotes}
   \setdefaultlanguage{spanish}
-  \usepackage[language=spanish, bibstyle=iso-authoryear, citestyle=verbose, sorting=nyt]{biblatex}
+  \usepackage[language=spanish, bibstyle=numeric, citestyle=numeric, sorting=nyt]{biblatex}
   
   \geometry{a4paper,top=2cm,left=3cm,right=1.5cm,marginparwidth=1.75cm}
   
@@ -72,7 +74,7 @@ header-includes: |
   \def\verbatim@font{\color{uocblue}\footnotesize\ttfamily\raggedright}
   \makeatother
   
-  \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\small}
+  %\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}, fontsize=\small}
   \renewcommand{\and}{\\}
   
   
@@ -211,117 +213,31 @@ seed <- 50L
 set.seed(seed)
 ```
 
-```{r bibliography, message=FALSE, warning=FALSE, include=FALSE}
-# Create bibliography for LaTeX
-bibliography <- c(
-  bibentry(bibtype='Book', author='Raul {Montoliu Colas}', 
-           title='Modelos supervisados', 
-           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284578', 
-           publisher='Universitat Oberta de Catalunya', 
-           urldate='2022-01-05', year=2021, key='book1'),
-  bibentry(bibtype='Book', author='Raul {Montoliu Colas}', 
-           title='Evaluacion de modelos', 
-           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284573', 
-           publisher='Universitat Oberta de Catalunya', 
-           urldate='2022-01-05', year=2021, key='book2'),
-  bibentry(bibtype='Book', author='Montserrat {Guillen Estany}, Maria Teresa {Alonso Alonso}', 
-           title='Modelos de regresion logistica', 
-           url='https://materials.campus.uoc.edu/daisy/Materials/PID_00276229/pdf/PID_00276229.pdf', 
-           publisher='Universitat Oberta de Catalunya', 
-           urldate='2022-01-05', year=2021, key='book3'),
-  bibentry(bibtype='Book', author='Jordi {Girones Roig}', 
-           title='Modelos no supervisados', 
-           url='http://cvapp.uoc.edu/autors/MostraPDFMaterialAction.do?id=284572', 
-           publisher='Universitat Oberta de Catalunya', 
-           urldate='2022-01-05', year=2021, key='book4'),
-  
-  bibentry(bibtype='InBook', author='Ruben {Fernandez Casal}, Julian {Costa Bouzas}, Manuel {Oviedo de la Fuente}', 
-           title='Arboles de decision', 
-           chapter='2',
-           booktitle='Aprendizaje estadistico',
-           publisher='unknown',
-           url='https://rubenfcasal.github.io/aprendizaje_estadistico/trees.html',
-           date='2021-10-13', urldate='2022-01-05', year=2020, key='ib1'),
-  
-  bibentry(bibtype='InBook', author='Fernando {Villalba}', 
-           title='Regresion logistica binaria', 
-           chapter='6',
-           booktitle='Aprendizaje supervisado en R',
-           publisher='unknown',
-           url='https://fervilber.github.io/Aprendizaje-supervisado-en-R/glm.html',
-           date='2018-10-01', urldate='2022-01-05', year=2020, key='ib2'),
-  
-  bibentry(bibtype='InBook', author='Fernando {Villalba}', 
-           title='Arboles de decision', 
-           chapter='7',
-           booktitle='Aprendizaje supervisado en R',
-           publisher='unknown',
-           url='https://fervilber.github.io/Aprendizaje-supervisado-en-R/arboles.html',
-           date='2018-10-01', urldate='2022-01-05', year=2020, key='ib3'),
-  
-  bibentry(bibtype='Article', author='Ekta Sharma', 
-           title='K-Means vs. DBSCAN Clustering - For Beginners', 
-           journal='Towards Data Science',
-           url='https://towardsdatascience.com/k-means-vs-dbscan-clustering-49f8e627de27',
-           date='2020-05-27', urldate='2022-01-05', year=2020, key='art1'),
-  bibentry(bibtype='Article', author='Soroush Hashemifar', 
-           title='K-KMeans vs. DBScan', 
-           journal='Medium',
-           url='https://soroushhashemifar.medium.com/kmeans-vs-dbscan-d9d5f9dbee8b',
-           date='2018-04-02', urldate='2022-01-05', year=2018, key='art2'),
-  bibentry(bibtype='Article', author='Fisseha Berhane', 
-           title='Data distributions where Kmeans clustering fails', 
-           journal='Data Science Enthusiast',
-           url='https://datascience-enthusiast.com/Python/DBSCAN_Kmeans.html',
-           urldate='2022-01-05', year=2021, key='art3'),
-  bibentry(bibtype='Article', author='Indraneel Dutta Baruah', 
-           title='K-means, DBSCAN, GMM, Agglomerative clustering - Mastering the popular models in a segmentation problem', 
-           journal='Towards Data Science',
-           url='https://towardsdatascience.com/k-means-dbscan-gmm-agglomerative-clustering-mastering-the-popular-models-in-a-segmentation-c891a3818e29',
-           date='2020-11-08', urldate='2022-01-05', year=2020, key='art4'),
-  
-  bibentry(bibtype='Article', author='Kamil Mysiak', 
-           title='Explaining DBSCAN Clustering', 
-           journal='Towards Data Science',
-           url='https://towardsdatascience.com/explaining-dbscan-clustering-18eaf5c83b31',
-           date='2020-07-16', urldate='2022-01-05', year=2020, key='art5'),
-  
-  bibentry(bibtype='Article', author='Avinash Navlani', 
-           title='Neural Network Models in R', 
-           journal='Datacamp Tutorials',
-           url='https://www.datacamp.com/community/tutorials/neural-network-models-r',
-           date='2019-12-09', urldate='2022-01-05', year=2019, key='art6')
-)
-bib.file <- file('real-estate.bib')
-writeLines(toBibtex(bibliography), bib.file, useBytes=TRUE)
-close(bib.file)
+\begin{center}
+	\vspace{0.25cm}
+	{\color{uocblue}\rule{\linewidth}{2pt}}
+	\vspace{-0.75cm}
+\end{center}
 
-rm(bibliography, bib.file)
-```
+# Introducción y descripción del *dataset*
 
+# Integración y selección de datos
 
-# Introducción
+# Limpieza de los datos
 
+## Gestión de *Missing Data*
 
-## R Markdown
+## Gestión de *outliers*
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Análisis de los datos
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Selección de grupos de datos
 
-```{r cars}
-summary(cars)
-```
+## Comprobación de normalidad y homocedasticidad
 
-## Including Plots
+## Pruebas estadísticas
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Conclusiones
 
 \newpage
 
