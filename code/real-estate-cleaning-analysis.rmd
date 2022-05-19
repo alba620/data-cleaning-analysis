@@ -114,7 +114,8 @@ header-includes: |
   \setlength{\footskip}{20pt}%
   \setlength{\headsep}{15pt}
   \setlength{\headheight}{42pt}
-  \setlength{\parskip}{10pt}
+  \setlength{\parskip}{7.5pt}
+  \setlength{\baselineskip}{1pt}
   \setlength{\topmargin}{-1cm}
   %\setlength{\textheight}{\textheight}
   \setlength{\textheight}{680pt}
@@ -136,13 +137,14 @@ header-includes: |
   	\space\master}
   \renewcommand{\headrulewidth}{0pt} % remove lines as well
   \renewcommand{\footrulewidth}{0pt}
-  \setlength{\footskip}{50pt}%
+  \setlength{\footskip}{20pt}%
   \setlength{\headsep}{15pt}
   \setlength{\headheight}{42pt}
-  \setlength{\parskip}{10pt}
+  \setlength{\parskip}{7.5pt}
+  \setlength{\baselineskip}{1pt}
   \setlength{\topmargin}{-1cm}
   %\setlength{\textheight}{\textheight}
-  \setlength{\textheight}{650pt}
+  \setlength{\textheight}{680pt}
   \setlength{\oddsidemargin}{0pt}
   \setlength{\marginparsep}{0pt}
   \setlength{\marginparpush}{0pt}
@@ -193,9 +195,6 @@ palette <- c(default.color.main, default.color.secondary,
              default.color.cinq, default.color.six,
              default.color.seven, default.color.eight, default.color.nine)
 palette.binary <- c(default.color.main, default.color.secondary)
-success.labeller <- ggplot2::as_labeller(c(`TRUE`='Éxito',
-                                           `FALSE`='Fracaso'))
-success.labeller.2 <- ggplot2::as_labeller(c(`1`='Éxito', `0`='Fracaso'))
 
 title.centered <- theme(
   plot.title=element_text(face='bold', hjust=0.5, vjust=0.5, size=16),
@@ -264,7 +263,7 @@ Se observa que todos los campos se han codificado como cadenas de caracteres. Es
 - **view3d**: valor lógico que indica si el anuncio cuenta con la característica de visión en 3D.
 - **video**: valor lógico que indica si el anuncio cuenta con un vídeo del piso.
 - **home.staging**: valor lógico que indica si el anuncio cuenta con la característica de *home staging*.
-- **description**: descripción del cuerpo del anuncio. Se mantiene en el *dataset* para ser analizada en mayor profundidad mediante análisis de textos.
+- **description**: descripción del cuerpo del anuncio. No se mantiene en el *dataset* por no poder ser analizada en mayor profundidad mediante análisis de textos (super el contexto de la asignatura). Sin embargo, se creará un campo nuevo ``description`` con el número de palabras contenidas en la descripción.
 - **photo_urls**: lista de los enlaces de las fotografías adjuntas al anuncio. Se descarta por no realizar un análisis de las fotografías.
 - **source**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del identificador único de cara registro.
 
@@ -278,10 +277,9 @@ selected.houses <- houses.raw %>% dplyr::select(-url, -title, -photo_urls) %>%
                 view3d=as.logical(as.integer(view3d)), 
                 video=as.logical(as.integer(video)),
                 home.staging=as.logical(as.integer(home.staging)),
+                description=nchar(description),
                 source=as.factor(source))
-
 selected.houses.dim <- dim(selected.houses)
-
 peek.dataset(selected.houses)
 ```
 
@@ -289,7 +287,16 @@ El conjunto de datos con el que se trabajará durante el resto del estudio está
 
 # Limpieza de los datos
 
+Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o **missing data**, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los m^2) para inspeccionar la existencia de valores extremos o **outliers**.
+
 ## Gestión de *Missing Data*
+
+Se procede a realizar un análisis preliminar y superficial de los valores perdidos en todos los campos:
+
+```{r}
+colSums(is.na(selected.houses))
+```
+
 
 ## Gestión de *outliers*
 
