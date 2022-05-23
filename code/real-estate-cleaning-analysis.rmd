@@ -295,10 +295,34 @@ Se procede a realizar un análisis preliminar y superficial de los valores perdi
 
 ```{r}
 colSums(is.na(selected.houses))
+head(selected.houses[is.na(selected.houses$id) | 
+                       is.na(selected.houses$price),], n=5)
+```
+
+Solo existe `r sum(is.na(selected.houses$id))` registro sin identificador y `r sum(is.na(selected.houses$price))` registro sin precio. Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide eliminar los registros y se procede a analizar los registros con valores perdidos en el campo *rooms*.
+
+```{r}
+selected.houses <- selected.houses[!is.na(selected.houses$id) & 
+                                     !is.na(selected.houses$price),]
+selected.houses.dim <- dim(selected.houses)
+```
+
+```{r}
+head(selected.houses[is.na(selected.houses$rooms),
+                     c('id', 'location', 'rooms', 'source')], n=5)
 ```
 
 
 ## Gestión de *outliers*
+
+## Otras transformaciones
+
+Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos y unificar los valores si es necesario.
+
+```{r}
+unique(selected.houses$location)
+```
+
 
 # Análisis de los datos
 
