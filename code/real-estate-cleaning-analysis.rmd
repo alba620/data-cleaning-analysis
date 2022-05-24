@@ -116,22 +116,10 @@ houses.raw.dim <- dim(houses.raw)
 
 Se han cargado `r houses.raw.dim[1]` registros con `r houses.raw.dim[2]` campos asociados a cada registro. Se procede a mostrar los nombres de los **campos y un ejemplo** para comprender mejor la estructura del conjunto de datos original gracias a la función *peek.dataset* creada para tal efecto, y que puede consultarse en el script *real-estate-cleaning-analysis.rmd*:
 
-
-```{r include=FALSE}
-peek.dataset <- function(dataset){
-  for (col in names(dataset)) {
-    example = as.character(dataset[1,col])
-    if(nchar(example) > 50){
-      example = paste0(substr(example, start=1, stop=50), '...')
-    }
-    cat(paste0('Campo ', col, ' (', class(dataset[1,col]), '): ', example, '\n'))
-  }
-}
-```
-
 ```{r}
-peek.dataset(houses.raw)
+head(houses.raw, n=10)
 ```
+
 Para finalizar la fase de integración de los datos, se eliminan las **viviendas duplicadas**, es decir, aquellos anuncios que contengan la misma vivienda en venta. Para ello, se evalúa cuáles tienen idéntico el campo *description*, puesto que pueden ser anuncios diferentes (con diferente *id* o *source*) pero con el mismo contenido. 
 
 ```{r include=FALSE}
@@ -211,7 +199,8 @@ selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>
                 description.length=nchar(description),
                 source=as.factor(source))
 selected.houses.dim <- dim(selected.houses)
-peek.dataset(selected.houses)
+
+head(selected.houses, n=10)
 ```
 
 Finalmente, debido a que la cantidad de registros no es muy elevada, se decide no reducirlos mediante ningún método.
@@ -228,8 +217,7 @@ Se procede a realizar un análisis preliminar y superficial de los valores perdi
 
 ```{r}
 colSums(is.na(selected.houses))
-head(selected.houses[is.na(selected.houses$id) | 
-                       is.na(selected.houses$price),], n=5)
+selected.houses[is.na(selected.houses$id) | is.na(selected.houses$price),]
 ```
 
 Solo existe `r sum(is.na(selected.houses$id))` registro sin identificador y `r sum(is.na(selected.houses$price))` registro sin precio. Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide eliminar los registros y se procede a analizar los registros con valores perdidos en el campo *rooms*.
@@ -241,8 +229,7 @@ selected.houses.dim <- dim(selected.houses)
 ```
 
 ```{r}
-head(selected.houses[is.na(selected.houses$rooms),
-                     c('id', 'location', 'rooms', 'source')], n=5)
+head(selected.houses[is.na(selected.houses$rooms),], n=10)
 ```
 
 
