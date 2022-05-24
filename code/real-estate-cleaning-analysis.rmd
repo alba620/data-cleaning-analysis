@@ -114,7 +114,7 @@ houses.raw <- read.csv('../data/real-estate-raw.csv', header=TRUE, sep=',',
 houses.raw.dim <- dim(houses.raw)
 ```
 
-Se han cargado `r houses.raw.dim[1]` registros con `r houses.raw.dim[2]` campos asociados a cada registro. Se procede a mostrar los nombres de los **campos y un ejemplo** para comprender mejor la estructura del conjunto de datos original gracias a la función *peek.dataset* creada para tal efecto, y que puede consultarse en el script *real-estate-cleaning-analysis.rmd*:
+Se han cargado `r houses.raw.dim[1]` registros con `r houses.raw.dim[2]` campos asociados a cada registro. Se procede a mostrar los 10 primeros registros para comprobar la estructura del conjunto de datos:
 
 ```{r}
 head(houses.raw, n=10)
@@ -122,13 +122,10 @@ head(houses.raw, n=10)
 
 Para finalizar la fase de integración de los datos, se eliminan las **viviendas duplicadas**, es decir, aquellos anuncios que contengan la misma vivienda en venta. Para ello, se evalúa cuáles tienen idéntico el campo *description*, puesto que pueden ser anuncios diferentes (con diferente *id* o *source*) pero con el mismo contenido. 
 
-```{r include=FALSE}
-duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
-```
-
-Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar anuncios **procedentes de Fotocasa e Idealista** que contienen la misma vivienda (el *dataframe* completo de duplicados puede consultarse en el script *real-estate-cleaning-analysis.rmd*):
+Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar anuncios **procedentes de Fotocasa e Idealista** que contienen la misma vivienda:
 
 ```{r}
+duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
 duplicated_integration <- duplicated.houses[duplicated.houses$id == '161630827' | 
                                         duplicated.houses$id == '97136644', 
                                       c('description', 'source')]
@@ -199,7 +196,6 @@ selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>
                 description.length=nchar(description),
                 source=as.factor(source))
 selected.houses.dim <- dim(selected.houses)
-
 head(selected.houses, n=10)
 ```
 
@@ -232,6 +228,7 @@ selected.houses.dim <- dim(selected.houses)
 head(selected.houses[is.na(selected.houses$rooms),], n=10)
 ```
 
+Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Al ser tantos registros (`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros) se decide no utilizar el campo. Otras opciones incluyen eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
 
 ## Gestión de *outliers*
 
@@ -241,7 +238,11 @@ Varios de los campos del *dataset* son factores y pueden albergar valores ligera
 
 ```{r}
 unique(selected.houses$location)
+unique(selected.houses$floor)
+unique(selected.houses$source)
 ```
+
+Tanto el campo *location* como *source*
 
 
 # Análisis de los datos
