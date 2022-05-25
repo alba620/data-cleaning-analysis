@@ -14,6 +14,7 @@ output:
     toc: yes
 encoding: UTF-8
 bibliography: real-estate.bib
+csl: iso690-author-date-fr.csl
 nocite: '@*'
 lang: es
 ---
@@ -226,13 +227,26 @@ Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor 
 Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos y unificar los valores si es necesario.
 
 ```{r}
-unique(selected.houses$location)
-unique(selected.houses$floor)
-unique(selected.houses$source)
+levels(selected.houses$location)
+levels(selected.houses$floor)
+levels(selected.houses$source)
+```
+El campo *source* contiene solo los valores esperados. El campo *location* contiene un nivel incorrecto y el campo *floor* contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide no utilizar la información de si la vivienda es interior o exterior y si posee o no ascensor; por tanto, se cambiará el tipo de dato de *floor* a entero.
+
+```{r}
+selected.houses <- droplevels.data.frame(selected.houses)
+levels(selected.houses$location)
+levels(selected.houses$floor)
 ```
 
-Tanto el campo *location* como *source*
+Al eliminar los niveles no utilizados en los factores, se han eliminado los niveles incorrectos de *location* y *floor*. Ahora solo hace falta modificar el campo *floor* para obtener únicamente la planta de la vivienda. Si la vivienda no tiene planta (el caso de "Sin planta"), se le asigna la planta 0.
 
+```{r}
+selected.houses <- selected.houses %>% dplyr::mutate(floor=as.character(floor)) %>%
+  dplyr::mutate(floor=ifelse(floor=='Sin planta', '0', floor)) %>%
+  dplyr::mutate(floor=readr::parse_number(floor))
+unique(selected.houses$floor)
+```
 
 # Análisis de los datos
 
