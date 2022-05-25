@@ -355,6 +355,20 @@ plot_ly(y = ~ selected.houses$description.length,
 
 # Conclusiones
 
-\newpage
+# Tabla de contribuciones
+
+A continuación se muestra cómo ambos miembros del equipo han participado en todas las tareas de este proyecto colaborativo: 
+
+```{r, echo=FALSE}
+contributions.table <- data.frame(Contribuciones = c("Investigación previa", 
+                                                     "Redacción de las respuestas", 
+                                                     "Desarrollo del código "), 
+                                  Firma = c("AGV, PLT",
+                                            "AGV, PLT",
+                                            "AGV, PLT"))
+contributions.table %>% 
+  kable() %>% 
+    kable_styling(bootstrap_options = Form.Basic)
+```
 
 # Bibliografía
