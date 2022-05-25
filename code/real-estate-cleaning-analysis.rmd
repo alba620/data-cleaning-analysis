@@ -38,6 +38,7 @@ if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 if (!require('caret')) install.packages('caret'); library('caret')
 if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+if (!require('plotly')) install.packages('plotly'); library('plotly')
 if (!require('GGally')) install.packages('GGally'); library('GGally')
 if (!require('scales')) install.packages('scales'); library('scales')
 if (!require('RColorBrewer')) install.packages('RColorBrewer'); library('RColorBrewer')
@@ -275,7 +276,71 @@ Por tanto, se decide **mantener todos los registros** sin valor en *rooms* y se 
 
 ## Gestión de *outliers*
 
+Tras el trabajo que se ha realizado con los datos, se puede deducir que los **valores extremos**, o *outliers*, solo pueden encontrarse en las variables *price*, *m2*, *rooms*, *floor* (en este momento categórica), *num.photos*, *price.m2* y *description.length*.
 
+Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja y se decide qué hacer con los candidatos a *outliers*. 
+
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$price, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list(type = "log", 
+                      title = "Precio en escala logarítmica"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución del precio según el barrio")
+```
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$m2, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list( title = "Metros cuadrados"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución de los metros cuadrados según el barrio")
+```
+
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$rooms, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list( title = "Número de habitaciones"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución del número de habitaciones según el barrio")
+```
+
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$floor, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list( title = "Planta"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución de la planta según el barrio")
+```
+
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$num.photos, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list( title = "Número de fotografías"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución del número de fotografías según el barrio")
+```
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$price.m2, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list(type = "log", 
+                      title = "Precio por metro cuadrado en escala logarítmica"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución del precio por metro cuadrado según el barrio")
+```
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$description.length, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list(title = "Longitud de la descripción"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución de la longitud del anuncio según el barrio")
+```
 # Análisis de los datos
 
 
