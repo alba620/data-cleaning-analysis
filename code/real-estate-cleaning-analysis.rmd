@@ -167,20 +167,21 @@ Como se ha observado que todos los campos se han codificado como cadenas de cara
 
 ```{r}
 selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>%  
-  dplyr::mutate(id=as.integer(id), 
-                location=as.factor(location),
-                price=as.integer(str_remove_all(price, '\\.')),
-                m2=as.integer(m2), 
+  dplyr::mutate(id = as.integer(id), 
+                location = as.factor(location),
+                price = as.integer(str_remove_all(price, '\\.')),
+                m2 = as.integer(m2), 
                 price.m2 = as.double(price/m2),
-                rooms=as.integer(rooms),floor=as.factor(floor), 
-                num.photos=as.integer(num.photos), 
-                floor.plan=as.logical(as.integer(floor.plan)),
-                view3d=as.logical(as.integer(view3d)), 
-                video=as.logical(as.integer(video)),
-                home.staging=as.logical(as.integer(home.staging)),
-                description=description,
-                description.length=nchar(description),
-                source=as.factor(source))
+                rooms = as.integer(rooms),
+                floor = as.factor(floor), 
+                num.photos = as.integer(num.photos), 
+                floor.plan = as.logical(as.integer(floor.plan)),
+                view3d = as.logical(as.integer(view3d)), 
+                video = as.logical(as.integer(video)),
+                home.staging = as.logical(as.integer(home.staging)),
+                description = description,
+                description.length = nchar(description),
+                source = as.factor(source))
 selected.houses.dim <- dim(selected.houses)
 houses.raw[sample(nrow(selected.houses), 5), ]
 ```
@@ -195,66 +196,97 @@ str(selected.houses)
 
 # Limpieza de los datos
 
-Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o **missing data**, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los m^2) para inspeccionar la existencia de valores extremos o **outliers**.
+Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o ***missing data***, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los $m^2$) para inspeccionar la existencia de valores extremos o ***outliers***. Sin embargo, tanto en la visualización de registros aleatorios del *dataframe* como en el estudio de la estructura, se ha detectado que hay campos que todavía deben tratarse mediante un proceso de **transformación previa** ya que su resultado puede afectar tanto a la gestión de *missing data* como de *outliers*. 
 
-## Gestión de *Missing Data*
+## Transformaciones previas
 
-Se procede a realizar un análisis preliminar y superficial de los valores perdidos en todos los campos:
-
-```{r}
-colSums(is.na(selected.houses))
-selected.houses[is.na(selected.houses$id) | is.na(selected.houses$price),]
-```
-
-Solo existe `r sum(is.na(selected.houses$id))` registro sin identificador y `r sum(is.na(selected.houses$price))` registro sin precio. Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide eliminar los registros y se procede a analizar los registros con valores perdidos en el campo *rooms*.
-
-```{r}
-selected.houses <- selected.houses[!is.na(selected.houses$id) & 
-                                     !is.na(selected.houses$price),]
-selected.houses.dim <- dim(selected.houses)
-```
-
-```{r}
-head(selected.houses[is.na(selected.houses$rooms),], n=10)
-```
-
-Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Al ser tantos registros (`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros) se decide no utilizar el campo. Otras opciones incluyen eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
-
-## Gestión de *outliers*
-
-## Otras transformaciones
-
-Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos y unificar los valores si es necesario.
+Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos para decidir sobre su necesidad de unificarlos:
 
 ```{r}
 levels(selected.houses$location)
 levels(selected.houses$floor)
 levels(selected.houses$source)
 ```
-El campo *source* contiene solo los valores esperados. El campo *location* contiene un nivel incorrecto y el campo *floor* contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide no utilizar la información de si la vivienda es interior o exterior y si posee o no ascensor; por tanto, se cambiará el tipo de dato de *floor* a entero.
+
+El campo ***source*** contiene solo los valores esperados. El campo ***location*** contiene un nivel incorrecto y el campo ***floor*** contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide descartar la información de si la vivienda es interior o exterior y si posee o no ascensor contenida en *floor*, por lo que se cambiará el tipo de dato de *floor* a entero, cuya información será útil en futuros análisis.
+
+Para ello, en primer lugar se eliminan los **niveles incorrectos** de *location* y *floor*:
 
 ```{r}
 selected.houses <- droplevels.data.frame(selected.houses)
-levels(selected.houses$location)
+```
+
+A continuación, se modifica el campo *floor* para obtener únicamente la **planta de la vivienda**. Si la vivienda no tiene planta (el caso de "Sin planta"), se le asigna la planta 0, conclusión a la que se llega tras la exploración de los datos y verificación por la información del campo *description*: 
+
+```{r}
+selected.houses <- selected.houses %>% 
+  dplyr::mutate(floor=as.character(floor)) %>%
+  dplyr::mutate(floor=ifelse(floor=='Sin planta', '0', floor)) %>%
+  dplyr::mutate(floor=readr::parse_number(floor)) %>% 
+  dplyr::mutate(floor=as.factor(floor))
 levels(selected.houses$floor)
 ```
 
-Al eliminar los niveles no utilizados en los factores, se han eliminado los niveles incorrectos de *location* y *floor*. Ahora solo hace falta modificar el campo *floor* para obtener únicamente la planta de la vivienda. Si la vivienda no tiene planta (el caso de "Sin planta"), se le asigna la planta 0.
+## Gestión de *Missing Data*
+
+Se procede a realizar un análisis preliminar y superficial de los **valores perdidos** en todos los campos:
 
 ```{r}
-selected.houses <- selected.houses %>% dplyr::mutate(floor=as.character(floor)) %>%
-  dplyr::mutate(floor=ifelse(floor=='Sin planta', '0', floor)) %>%
-  dplyr::mutate(floor=readr::parse_number(floor))
-unique(selected.houses$floor)
+kable(colSums(is.na(selected.houses)),
+      digits=2, 
+      align='l', 
+      caption="Valores nulos en cada variable") %>%
+  kable_styling(bootstrap_options = Form.Basic) %>%
+    scroll_box(width = "100%", height = "470px")
 ```
+Como se puede observar, el campo *rooms* es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables *id*, *price* o *floor*:
+
+```{r}
+selected.houses[is.na(selected.houses$id) | 
+                  is.na(selected.houses$price) | 
+                  is.na(selected.houses$floor),]
+```
+
+Solo existe `r sum(is.na(selected.houses$id))` registro sin identificador, `r sum(is.na(selected.houses$price))` registro sin precio y `r sum(is.na(selected.houses$floor))` sin planta. Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide eliminar los registros.
+
+```{r}
+selected.houses <- selected.houses[!is.na(selected.houses$id) & 
+                                     !is.na(selected.houses$price) &
+                                     !is.na(selected.houses$floor),]
+```
+
+Se procede ahora a analizar los registros con valores perdidos en el campo *rooms* y, para ello, se decide mostrar todos los registros en busca de un patrón:
+
+```{r}
+selected.houses[is.na(selected.houses$rooms),]
+```
+
+Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Se trata del `r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros pero se observa claramente que se trata de viviendas que proceden de Idealista. Se verifica dicha suposición:
+
+```{r}
+if(length(which(is.na(selected.houses$rooms))) == 
+   length(selected.houses$source[selected.houses$source == 'idealista'])){
+  print("El número de viviendas sin valor en 'rooms' SÍ es igual al de procedentes de Idealista.")
+} else {
+  print("El número de viviendas sin valor en 'rooms' NO es igual al de procedentes de Idealista.")
+}
+```
+Por tanto, se decide **mantener todos los registros** sin valor en *rooms* y se tiene en cuenta para futuros análisis que si se quiere emplear esta variable solamente se podrán tener en cuentra las viviendas procedentes del portal web de **Fotocasa**. Otras opciones habrían contemplado eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
+
+## Gestión de *outliers*
+
 
 # Análisis de los datos
 
+
 ## Selección de grupos de datos
+
 
 ## Comprobación de normalidad y homocedasticidad
 
+
 ## Pruebas estadísticas
+
 
 # Conclusiones
 
