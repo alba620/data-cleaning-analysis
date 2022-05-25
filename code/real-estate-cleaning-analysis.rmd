@@ -1,12 +1,13 @@
 ---
-title: "Limpieza y análisis de datos del mercado inmobiliario"
+title: <center> Limpieza y análisis de datos del mercado inmobiliario </center>
 author: "Alba Gómez Varela | Patricia Lázaro Tello"
 output:
   html_document:
     theme: flatly
     highlight: tango
+    number_sections: yes
     toc: yes
-    toc_float:
+    toc_float: 
       collapsed: no
     df_print: paged
   pdf_document:
@@ -17,7 +18,7 @@ nocite: '@*'
 lang: es
 ---
 ```{css, echo=FALSE}
-h1, h4 {
+h4 {
   text-align: center;
 }
 ```
@@ -40,7 +41,7 @@ if (!require('GGally')) install.packages('GGally'); library('GGally')
 if (!require('scales')) install.packages('scales'); library('scales')
 if (!require('RColorBrewer')) install.packages('RColorBrewer'); library('RColorBrewer')
 if(!require('ggpubr')) install.packages('ggpubr'); library('ggpubr')
-if(!require('flextable')) install.packages('flextable'); library('flextable')
+if(!require('kableExtra')) install.packages('kableExtra'); library('kableExtra')
 # definicion de colores
 default.color.main <- '#F8766D'
 default.color.secondary <- '#00BFC4'
@@ -73,17 +74,11 @@ seed <- 50L
 set.seed(seed)
 ```
 
-\begin{center}
-	\vspace{0.25cm}
-	{\color{uocblue}\rule{\linewidth}{2pt}}
-	\vspace{-0.75cm}
-\end{center}
+# Introducción y descripción del *dataset*
 
-## Introducción y descripción del *dataset*
+# Integración, selección y transformación de datos
 
-## Integración, selección y transformación de datos
-
-En primer lugar, se procede a **cargar los datos** *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022 para la Práctica 1 de esta asignatura. En dicho fichero, ya se encuentran integrados los registros obtenidos tras el proceso de *scraping* de Idealista y de Fotocasa, por lo que no es necesario realizar de nuevo el proceso para la fusión de los datos:
+En primer lugar, se procede a **cargar los datos** *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022 para la Práctica 1 de esta asignatura. En dicho fichero, ya se encuentran integrados los registros obtenidos tras el proceso de *scraping* de Idealista y de Fotocasa, por lo que no es necesario realizar de nuevo el proceso para la fusión de los datos.
 
 ```{r}
 houses.raw <- read.csv('../data/real-estate-raw.csv', header=TRUE, sep=',', 
@@ -91,40 +86,53 @@ houses.raw <- read.csv('../data/real-estate-raw.csv', header=TRUE, sep=',',
 houses.raw.dim <- dim(houses.raw)
 ```
 
-Se han cargado `r houses.raw.dim[1]` registros con `r houses.raw.dim[2]` campos asociados a cada registro. Se procede a mostrar los 10 primeros registros para comprobar la estructura del conjunto de datos:
+Se han cargado **`r houses.raw.dim[1]` registros** con **`r houses.raw.dim[2]` campos** asociados a cada uno. Así, se muestran **5 registros aleatorios** para comprobar la estructura del conjunto de datos, puesto que si se seleccionan los del principio (*head*) o final (*tail*) todos serán de la misma fuente de datos:
 
 ```{r}
-head(houses.raw, n=10)
+houses.raw[sample(nrow(houses.raw), 5), ]
 ```
 
-Para finalizar la fase de integración de los datos, se eliminan las **viviendas duplicadas**, es decir, aquellos anuncios que contengan la misma vivienda en venta. Para ello, se evalúa cuáles tienen idéntico el campo *description*, puesto que pueden ser anuncios diferentes (con diferente *id* o *source*) pero con el mismo contenido. 
+Además, se examina el **tipo de datos** con los que R ha interpretado cada variable:
+
+```{r}
+Form.Basic = c("striped", "hover", "condensed", "responsive")
+kbl(cbind(sapply(houses.raw, class)),
+    caption="Tipo de datos de cada variable") %>%
+  kable_styling(bootstrap_options = Form.Basic) %>%
+  scroll_box(width = "100%", 
+             height = "400px")
+```
+
+Para finalizar la fase de integración de los datos, se eliminan las **viviendas duplicadas**, es decir, aquellos anuncios que contengan la misma vivienda en venta. Para ello, se evalúa cuáles tienen idéntico el campo *description*, puesto que pueden ser anuncios diferentes (con diferente *id* o *source*) pero con el mismo contenido. Para profundizar en el asunto y poderlo analizar mejor se extraen en un nuevo *dataframe* las viviendas duplicadas según este criterio.
+
+```{r}
+duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
+```
 
 Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar anuncios **procedentes de Fotocasa e Idealista** que contienen la misma vivienda:
 
 ```{r}
-duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
 duplicated_integration <- duplicated.houses[duplicated.houses$id == '161630827' | 
                                         duplicated.houses$id == '97136644', 
-                                      c('description', 'source')]
+                                      c('description', 'source', 'location', 'price')]
 
-flextable(data = data.frame(duplicated_integration)) %>% 
-  theme_zebra %>% 
-  autofit
+duplicated_integration
 ```
 
 Por otro lado, se observa como fenómeno que también existen viviendas ofertadas varias veces en el **mismo portal** inmobiliario:
 
 ```{r}
-duplicated_source <- duplicated.houses[duplicated.houses$id == '96872707' | 
-                                        duplicated.houses$id == '96872635'| 
-                                      duplicated.houses$id == '96872687'|
-                                      duplicated.houses$id == '96872637'|
-                                      duplicated.houses$id == '96872706',
-                                      c('description', 'source')]
+duplicated_source <- duplicated.houses[duplicated.houses$id == '157307581' | 
+                                         duplicated.houses$id == '160123208'| 
+                                         duplicated.houses$id == '162766808'|
+                                         duplicated.houses$id == '96250173'|
+                                         duplicated.houses$id == '91151646'|
+                                         duplicated.houses$id == '96890387'|
+                                         duplicated.houses$id == '91334123'|
+                                         duplicated.houses$id == '96857738',
+                                      c('description', 'source', 'location', 'price')]
 
-flextable(data = data.frame(duplicated_source)) %>% 
-  theme_zebra %>% 
-  autofit
+duplicated_source
 ```
 
 Con esta información, se deciden eliminar las **viviendas duplicadas** y, en caso de que se encuentre en ambos sitios web, se mantiene la vivienda de Fotocasa al contener información en el campo *rooms*, asunto que se trabajará más adelante. Fotocasas se selecciona por defecto porque es el primer registro que aparece en el *dataframe* original:
@@ -154,7 +162,7 @@ Sin registros duplicados, se pasa a la selección de los datos de interés, que 
 - **photo_urls**: lista de los enlaces de las fotografías adjuntas al anuncio. Se descarta por no realizar un análisis de las fotografías.
 - **source**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del identificador único de cara registro y sirve, además, para agrupar viviendas.
 
-Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de selección de datos realizando también la transformación del tipo de datos. Asím a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos:
+Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de **selección** de datos realizando también la **transformación** del tipo de datos. Así, a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos y se muestran 5 registros al azar:
 
 ```{r}
 selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>%  
@@ -173,18 +181,22 @@ selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>
                 description.length=nchar(description),
                 source=as.factor(source))
 selected.houses.dim <- dim(selected.houses)
-head(selected.houses, n=10)
+houses.raw[sample(nrow(selected.houses), 5), ]
 ```
 
-Finalmente, debido a que la cantidad de registros no es muy elevada, se decide no reducirlos mediante ningún método.
+Finalmente, debido a que la cantidad de registros no es muy elevada, se decide **no reducirlos** mediante ningún método.
 
-Por tanto, el conjunto de datos con el que se trabajará durante el resto del estudio está compuesto de **`r selected.houses.dim[1]` registros** con **`r selected.houses.dim[2]` campos** por cada registro.
+Por tanto, el conjunto de datos con el que se trabajará durante el resto del estudio está compuesto de **`r selected.houses.dim[1]` registros** con **`r selected.houses.dim[2]` campos** por cada registro. En este punto, y antes de continuar con la limpieza de datos, es interesante mostrar la estructura completa del *dataframe*:
 
-## Limpieza de los datos
+```{r}
+str(selected.houses)
+```
+
+# Limpieza de los datos
 
 Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o **missing data**, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los m^2) para inspeccionar la existencia de valores extremos o **outliers**.
 
-### Gestión de *Missing Data*
+## Gestión de *Missing Data*
 
 Se procede a realizar un análisis preliminar y superficial de los valores perdidos en todos los campos:
 
@@ -207,9 +219,9 @@ head(selected.houses[is.na(selected.houses$rooms),], n=10)
 
 Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Al ser tantos registros (`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros) se decide no utilizar el campo. Otras opciones incluyen eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
 
-### Gestión de *outliers*
+## Gestión de *outliers*
 
-### Otras transformaciones
+## Otras transformaciones
 
 Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos y unificar los valores si es necesario.
 
@@ -222,16 +234,16 @@ unique(selected.houses$source)
 Tanto el campo *location* como *source*
 
 
-## Análisis de los datos
+# Análisis de los datos
 
-### Selección de grupos de datos
+## Selección de grupos de datos
 
-### Comprobación de normalidad y homocedasticidad
+## Comprobación de normalidad y homocedasticidad
 
-### Pruebas estadísticas
+## Pruebas estadísticas
 
-## Conclusiones
+# Conclusiones
 
 \newpage
 
-## Bibliografía
+# Bibliografía
