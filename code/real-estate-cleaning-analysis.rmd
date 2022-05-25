@@ -1,49 +1,26 @@
 ---
-title: |
-  | Limpieza y análisis de datos
-  | del mercado inmobiliario
-author:
-- Alba Gómez Varela
-- Patricia Lázaro Tello
-date: ''
+title: "Limpieza y análisis de datos del mercado inmobiliario"
+author: "Alba Gómez Varela | Patricia Lázaro Tello"
 output:
   html_document:
-    toc: no
+    theme: flatly
+    highlight: tango
+    toc: yes
+    toc_float:
+      collapsed: no
     df_print: paged
   pdf_document:
-    keep_tex: no
-    latex_engine: xelatex
-    highlight: tango
-    df_print: default
-    number_section: yes
-    toc: no
-fontsize: 12pt
+    toc: yes
+encoding: UTF-8
 bibliography: real-estate.bib
 nocite: '@*'
 lang: es
-header-includes: "\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage{xcolor}\n\\usepackage{graphicx}\n\\usepackage[font=footnotesize,labelfont=bf]{caption}\n%\\usepackage[hidelinks]{hyperref}\n\\usepackage{fontspec}\n\\usepackage{fancyhdr}\n\\usepackage{titling}\n\\usepackage{array}\n\\usepackage{multicol}\n\\usepackage{framed}\n\\usepackage{enumitem}\n\\usepackage{soul}\n\\usepackage{subcaption}\n\\usepackage{wrapfig}\n\\usepackage{listings}\n\\usepackage{layout}\n\\usepackage{polyglossia}\n\\usepackage{csquotes}\n\\setdefaultlanguage{spanish}\n\\usepackage[language=spanish,
-  bibstyle=numeric, citestyle=numeric, sorting=nyt]{biblatex}\n\n\\geometry{a4paper,top=2cm,left=3cm,right=1.5cm,marginparwidth=1.75cm}\n\n\\definecolor{uocblue}{HTML}{000078}\n\\colorlet{uocresalt}{white!93!uocblue}\n\\sethlcolor{uocresalt}\n\\colorlet{main}{uocblue}\n\\setmainfont{Arial}[Color
-  = uocblue]\n\\renewcommand{\\labelitemi}{$\\textcolor{uocblue}{\\bullet}$}\n\\renewcommand{\\labelitemii}{$\\textcolor{uocblue}{\\cdot}$}\n\\renewcommand{\\labelitemiii}{$\\textcolor{uocblue}{\\diamond}$}\n\\renewcommand{\\labelitemiv}{$\\textcolor{uocblue}{\\ast}$}\n\\renewcommand{\\thefootnote}{\\textbf{\\arabic{footnote}}}\n\\renewcommand{\\footnoterule}{{\n\t\t\\color{uocblue}\n\t\t\\kern
-  20pt\n\t\t\\hrule width 2in\n\t\t\\kern 3pt\n}}\n\\setulcolor{uocblue}\n\n\\setcounter{biburllcpenalty}{7000}\n\\setcounter{biburlucpenalty}{8000}\n\n\\hypersetup{allcolors=uocblue}\n\\urlstyle{same}\n\n\n\\makeatletter\n\\def\\@xobeysp{\\mbox{}\\space}\n\\def\\verbatim@font{\\color{uocblue}\\footnotesize\\ttfamily\\raggedright}\n\\makeatother\n\n\\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\\\\{\\},
-  fontsize=\\small}\n\\renewcommand{\\and}{\\\\}\n\n\n%%%%%%%%%%%%%%%%%\n\\newcommand{\\master}{Máster
-  en Ciencia de Datos}\n\\newcommand{\\grade}{2021/2022}\n\\newcommand{\\subject}{Tipología
-  y ciclo de vida del dato}\n\\newcommand{\\testname}{\\textbf{PRA2}}\n\\newcommand{\\loginuocone}{agomezvarela@uoc.edu}\n\\newcommand{\\loginuoctwo}{plazarotello@uoc.edu}\n\\newcommand{\\authorone}{Alba
-  Gómez Varela}\n\\newcommand{\\authortwo}{Patricia Lázaro Tello}\n\\title{Limpieza
-  y análisis de datos del mercado inmobiliario}\n\\author{Alba Gómez Varela\\\\Patricia
-  Lázaro Tello}\n\\date{}\t% quitar la fecha del titulo\n%%%%%%%%%%%%%%%%%\n\n\\pretitle{\\vspace{-2cm}\\begin{center}\\LARGE
-  \\bfseries}\n\\posttitle{\\end{center}}\n\\preauthor{\\vspace{-0.0065cm}\\begin{center}\n\t\t\\large
-  \\itshape\n\t\t\\begin{tabular}[t]{c}}\n\t\t\\postauthor{\\end{tabular}\\end{center}\\vspace{-1.5cm}}\n\t\t\n\n\\fancypagestyle{uoc}{\n\\fancyhf{}\n\\fancyhead[C]{\\includegraphics[width=16.5cm]{uoc.png}}\n\\fancyhead[R]{\\footnotesize
-  \\hspace*{\\fill}\\authorone \\space \\space · \\space \\nolinkurl{\\loginuocone}\\\\\n\t\\hspace*{\\fill}\\authortwo
-  \\space \\space \\space · \\space\\space\\space \\nolinkurl{\\loginuoctwo}\\\\ \\vspace{-2pt}}\n\\fancyfoot[R]{\\footnotesize
-  \\thepage} %\\hspace{0.5cm}}\n\\fancyfoot[C]{\\footnotesize \\hspace{1.5cm} \\grade}\n\\fancyfoot[L]{\\footnotesize
-  \\subject \\space · \\testname\\\\\n\t\\space\\master}\n\\renewcommand{\\headrulewidth}{0pt}
-  % remove lines as well\n\\renewcommand{\\footrulewidth}{0pt}\n\\setlength{\\footskip}{20pt}%\n\\setlength{\\headsep}{15pt}\n\\setlength{\\headheight}{42pt}\n\\setlength{\\parskip}{7.5pt}\n\\setlength{\\baselineskip}{1pt}\n\\setlength{\\topmargin}{-1cm}\n%\\setlength{\\textheight}{\\textheight}\n\\setlength{\\textheight}{680pt}\n\\setlength{\\oddsidemargin}{0pt}\n\\setlength{\\marginparsep}{0pt}\n\\setlength{\\marginparpush}{0pt}\n\\setlength{\\voffset}{-10pt}\n\\setlength{\\fboxsep}{0pt}\n}\n\n\\fancypagestyle{plain}{\n\\fancyhf{}\n\\fancyhead[C]{\\includegraphics[width=16.5cm]{uoc.png}}\n\\fancyhead[R]{\\footnotesize
-  \\hspace*{\\fill}\\authorone \\space \\space · \\space \\nolinkurl{\\loginuocone}\\\\\n\t\\hspace*{\\fill}\\authortwo
-  \\space \\space \\space · \\space\\space\\space \\nolinkurl{\\loginuoctwo}\\\\ \\vspace{-2pt}}\n\\fancyfoot[R]{\\footnotesize
-  \\thepage} %\\hspace{0.5cm}}\n\\fancyfoot[C]{\\footnotesize \\hspace{1.5cm} \\grade}\n\\fancyfoot[L]{\\footnotesize
-  \\subject \\space · \\testname\\\\\n\t\\space\\master}\n\\renewcommand{\\headrulewidth}{0pt}
-  % remove lines as well\n\\renewcommand{\\footrulewidth}{0pt}\n\\setlength{\\footskip}{20pt}%\n\\setlength{\\headsep}{15pt}\n\\setlength{\\headheight}{42pt}\n\\setlength{\\parskip}{7.5pt}\n\\setlength{\\baselineskip}{1pt}\n\\setlength{\\topmargin}{-1cm}\n%\\setlength{\\textheight}{\\textheight}\n\\setlength{\\textheight}{680pt}\n\\setlength{\\oddsidemargin}{0pt}\n\\setlength{\\marginparsep}{0pt}\n\\setlength{\\marginparpush}{0pt}\n\\setlength{\\voffset}{-10pt}\n\\setlength{\\fboxsep}{0pt}\n}\n\n\\pagestyle{uoc}\n\\linespread{1.125}\n\\color{uocblue}\n"
 ---
+```{css, echo=FALSE}
+h1, h4 {
+  text-align: center;
+}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE,
@@ -102,9 +79,9 @@ set.seed(seed)
 	\vspace{-0.75cm}
 \end{center}
 
-# Introducción y descripción del *dataset*
+## Introducción y descripción del *dataset*
 
-# Integración, selección y transformación de datos
+## Integración, selección y transformación de datos
 
 En primer lugar, se procede a **cargar los datos** *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022 para la Práctica 1 de esta asignatura. En dicho fichero, ya se encuentran integrados los registros obtenidos tras el proceso de *scraping* de Idealista y de Fotocasa, por lo que no es necesario realizar de nuevo el proceso para la fusión de los datos:
 
@@ -203,11 +180,11 @@ Finalmente, debido a que la cantidad de registros no es muy elevada, se decide n
 
 Por tanto, el conjunto de datos con el que se trabajará durante el resto del estudio está compuesto de **`r selected.houses.dim[1]` registros** con **`r selected.houses.dim[2]` campos** por cada registro.
 
-# Limpieza de los datos
+## Limpieza de los datos
 
 Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o **missing data**, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los m^2) para inspeccionar la existencia de valores extremos o **outliers**.
 
-## Gestión de *Missing Data*
+### Gestión de *Missing Data*
 
 Se procede a realizar un análisis preliminar y superficial de los valores perdidos en todos los campos:
 
@@ -230,9 +207,9 @@ head(selected.houses[is.na(selected.houses$rooms),], n=10)
 
 Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Al ser tantos registros (`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros) se decide no utilizar el campo. Otras opciones incluyen eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
 
-## Gestión de *outliers*
+### Gestión de *outliers*
 
-## Otras transformaciones
+### Otras transformaciones
 
 Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos y unificar los valores si es necesario.
 
@@ -245,16 +222,16 @@ unique(selected.houses$source)
 Tanto el campo *location* como *source*
 
 
-# Análisis de los datos
+## Análisis de los datos
 
-## Selección de grupos de datos
+### Selección de grupos de datos
 
-## Comprobación de normalidad y homocedasticidad
+### Comprobación de normalidad y homocedasticidad
 
-## Pruebas estadísticas
+### Pruebas estadísticas
 
-# Conclusiones
+## Conclusiones
 
 \newpage
 
-# Bibliografía
+## Bibliografía
