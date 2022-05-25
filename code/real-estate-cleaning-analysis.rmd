@@ -280,6 +280,8 @@ Tras el trabajo que se ha realizado con los datos, se puede deducir que los **va
 
 Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja y se decide qué hacer con los candidatos a *outliers*. 
 
+En primer lugar, se analiza el **precio**:
+
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$price, 
         color = ~ selected.houses$location, 
@@ -289,6 +291,59 @@ plot_ly(y = ~ selected.houses$price,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del precio según el barrio")
 ```
+Que haya viviendas caras hasta tal punto que su precio parezca un posible valor extremo equivocado no debe sorprender en este proyecto debido a que el mercado inmobiliario se caracteriza precisamente por ello. En cualquier caso, para verificar que estos **precios son compatibles con la realidad**, se opta por extraer los registros de las viviendas sospechosas.
+
+```{r}
+villaverde.price <- selected.houses[selected.houses$price %in% 
+                  boxplot.stats(selected.houses$price[selected.houses$location == 'villaverde'])$out & 
+                  selected.houses$location == 'villaverde' ,]
+
+salamanca.price <- selected.houses[selected.houses$price %in% 
+                  boxplot.stats(selected.houses$price[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  selected.houses$location == 'barrio-de-salamanca' ,]
+```
+
+Tras estudiarlos en profundidad, se descubre que en ambos barrios los pisos considerados atípicamente caros también son **muy grandes** para la zona en la que se encuentran:
+
+```{r}
+min(villaverde.price$m2)
+min(salamanca.price$m2)
+```
+Por tanto se decide **no tratar** dichos registros a encontrarse dentro del rango de lo posible en este contexto, como se puede observar del tamaño mínimo de estas viviendas. 
+
+A continuación se analiza el **precio por metro cuadrado**
+
+```{r, out.width="100%",out.height ="50%"}
+plot_ly(y = ~ selected.houses$price.m2, 
+        color = ~ selected.houses$location, 
+        type = "box") %>%
+  layout(yaxis = list(type = "log", 
+                      title = "Precio por metro cuadrado en escala logarítmica"), 
+         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
+         title = "Distribución del precio por metro cuadrado según el barrio")
+```
+Como en el caso anterior, se extraen los **registros de las viviendas** que tienen un precio atípicamente alto o bajo en relación con sus metros cuadradados para cada uno de los barrios de Madrid analizados:
+
+```{r}
+villaverde.price.m2 <- selected.houses[selected.houses$price.m2 %in% 
+                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 'villaverde'])$out & 
+                  selected.houses$location == 'villaverde' ,]
+
+salamanca.price.m2 <- selected.houses[selected.houses$price.m2 %in% 
+                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  selected.houses$location == 'barrio-de-salamanca' ,]
+```
+
+Tras estudiar los **51 registros** en profundidad, no se encuentra un patrón que pudiera explicar esta situación y los valores del resto de campos son coherentes con el ámbito de este proyecto. Si embargo, sí que se detecta que las tres viviendas con un precio más bajo por metro cuadradado en Villaverde no son tal, sino que se trata de **parcelas**, por lo que se procede a su eliminación: 
+
+```{r}
+selected.houses <- subset(selected.houses, id!="162471798" & 
+                            id != "159999857" & 
+                            id !="162471885")
+```
+
+Acabado el análisis sobre el precio, se pasa a estudiar el **tamaño**:
+
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$m2, 
         color = ~ selected.houses$location, 
@@ -297,6 +352,21 @@ plot_ly(y = ~ selected.houses$m2,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de los metros cuadrados según el barrio")
 ```
+También se extraen los **registros de las viviendas** que tienen un tamaño atípicamente alto para cada uno de los barrios.:
+
+```{r}
+villaverde.m2 <- selected.houses[selected.houses$m2 %in% 
+                  boxplot.stats(selected.houses$m2[selected.houses$location == 'villaverde'])$out & 
+                  selected.houses$location == 'villaverde' ,]
+
+salamanca.m2 <- selected.houses[selected.houses$m2 %in% 
+                  boxplot.stats(selected.houses$m2[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  selected.houses$location == 'barrio-de-salamanca' ,]
+```
+
+Tras analizar los **122 registros** no se encuentra **ninguna anomalía** que haga sospechar de un error en los datos y el tamaño por encima de lo esperado en la zona se debe simplemente a que se trata de viviendas grandes. De hecho, en las descripciones de varias de ellas se detalla que se pueden dividir en varias viviendas o el número de plantas que tiene dentro. 
+
+El siguiente paso es analizar el **número de habitaciones** teniendo en cuenta que este dato procede únicamente de las viviendas anunciadas en Fotocasa:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$rooms, 
@@ -306,6 +376,18 @@ plot_ly(y = ~ selected.houses$rooms,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del número de habitaciones según el barrio")
 ```
+Se sigue el mismo procedimiento que antes, analizando por separado los posibles *outliers* pero, como era de esperar, las **4 viviendas** con más habitaciones también son más grandes, por lo que se decide **no tratar** estos registros.
+
+```{r}
+villaverde.rooms <- selected.houses[selected.houses$rooms %in% 
+                  boxplot.stats(selected.houses$rooms[selected.houses$location == 'villaverde'])$out & 
+                  selected.houses$location == 'villaverde' ,]
+
+salamanca.rooms <- selected.houses[selected.houses$rooms %in% 
+                  boxplot.stats(selected.houses$rooms[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  selected.houses$location == 'barrio-de-salamanca' ,]
+```
+
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$floor, 
@@ -324,15 +406,7 @@ plot_ly(y = ~ selected.houses$num.photos,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del número de fotografías según el barrio")
 ```
-```{r, out.width="100%",out.height ="50%"}
-plot_ly(y = ~ selected.houses$price.m2, 
-        color = ~ selected.houses$location, 
-        type = "box") %>%
-  layout(yaxis = list(type = "log", 
-                      title = "Precio por metro cuadrado en escala logarítmica"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución del precio por metro cuadrado según el barrio")
-```
+
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$description.length, 
         color = ~ selected.houses$location, 
@@ -341,6 +415,8 @@ plot_ly(y = ~ selected.houses$description.length,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de la longitud del anuncio según el barrio")
 ```
+Este apartado ha sido útil para descartar la eliminación de posibles *outliers* pero, además, para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el siguiente apartado se llegará a conclusiones más precisas. 
+
 # Análisis de los datos
 
 
