@@ -388,6 +388,7 @@ salamanca.rooms <- selected.houses[selected.houses$rooms %in%
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
+A continuación se visualizan los candidatos a *outliers* según la **planta** en la que se encuentra la vivienda:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$floor, 
@@ -397,6 +398,9 @@ plot_ly(y = ~ selected.houses$floor,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de la planta según el barrio")
 ```
+Según los datos del **Catastro** en el Barrio de Salamanca de Madrid **existen edificios** de 12 alturas y en el de Villaverde de 13, e incluso más en ambos casos, aunque no es lo más común. Por tanto, cabe la posibilidad de que las viviendas en venta se encuentren den dichas plantas, por lo que no es necesario profundizar en el análisis de estos datos o los registros completos. 
+
+En cuanto al **número de fotografías**, los *boxplots* resultantes son los siguientes:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$num.photos, 
@@ -406,6 +410,13 @@ plot_ly(y = ~ selected.houses$num.photos,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del número de fotografías según el barrio")
 ```
+si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes anuncia una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto. 
+
+```{r}
+selected.houses[(selected.houses$num.photos = 194),]
+```
+
+Por úlimo, se evalúa la variable que recoge la longitud de la descripción en caracteres:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$description.length, 
@@ -415,7 +426,9 @@ plot_ly(y = ~ selected.houses$description.length,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de la longitud del anuncio según el barrio")
 ```
-Este apartado ha sido útil para descartar la eliminación de posibles *outliers* pero, además, para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el siguiente apartado se llegará a conclusiones más precisas. 
+Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000** y la de **Idealista** sube este máximo hasta los **5.000** caracteres, los marcados como posibles *outliers* se consideran registros dentro de lo posible, por lo que se decide mantenerlos sin actuar sobre ellos. 
+
+**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo era. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el siguiente apartado se llegará a conclusiones más precisas.
 
 # Análisis de los datos
 
