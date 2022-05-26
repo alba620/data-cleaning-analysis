@@ -577,7 +577,7 @@ upper.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clas
 
 Se procede a comprobar si las variables cuantitativas *price*, *m2* y *price.m2* cumplen los supuestos de normalidad. A su vez, también se comprobará si el precio por m^2 cumple el supuesto de homocedasticidad para las viviendas agrupadas por barrio y las viviendas agrupadas por barrio y altura.
 
-### Normalidad de la variable *price*
+### Normalidad de `price`
 
 Se procede a realizar las comprobaciones de normalidad en la variable `price`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
@@ -607,7 +607,7 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$price)
 ```
 
-Las gráficas muestran que el precio de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `precio` no es normal (p-value < \alpha = 0.05). Sin embargo, la variable `precio` parece seguir una distribución log-normal; es decir, el logaritmo del precio puede seguir una distribución normal. Se procede a comprobar dicha hipótesis:
+Las gráficas muestran que el precio de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `precio` no es normal (p-value < $\alpha$ = 0.05). Sin embargo, la variable `precio` parece seguir una distribución log-normal; es decir, el logaritmo del precio puede seguir una distribución normal. Se procede a comprobar dicha hipótesis:
 
 ```{r fig.height=5, fig.width=10}
 selected.houses <- selected.houses %>% plyr::mutate(price.log = log(price))
@@ -636,9 +636,9 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$price.log)
 ```
 
-La variable `precio` tampoco sigue una distribución log-normal, según se aprecia tanto en los gráficos (colas muy pesadas en el qqplot) como en el test de Lilliefors (p-value < \alpha = 0.05). Se concluye por tanto que la variable `precio` no sigue una distribución normal.
+La variable `precio` tampoco sigue una distribución log-normal, según se aprecia tanto en los gráficos (colas muy pesadas en el qqplot) como en el test de Lilliefors (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable `precio` no sigue una distribución normal.
 
-### Normalidad de la variable *m2*
+### Normalidad de `m2`
 
 Se procede a realizar las comprobaciones de normalidad en la variable `m2`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
@@ -668,9 +668,9 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$m2)
 ```
 
-Las gráficas muestran que la superficie (m^2) de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `m2` no es normal (p-value < \alpha = 0.05). Se concluye por tanto que la variable `m2` no sigue una distribución normal.
+Las gráficas muestran que la superficie (m^2) de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `m2` no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable `m2` no sigue una distribución normal.
 
-### Normalidad de la variable *price.m2*
+### Normalidad de `price.m2`
 
 Se procede a realizar las comprobaciones de normalidad en la variable `price.m2`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
@@ -700,18 +700,18 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$price.m2)
 ```
 
-Las gráficas muestran que el precio por metro cuadrado de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `price.m2` no es normal (p-value < \alpha = 0.05). Se concluye por tanto que la variable `price.m2` no sigue una distribución normal.
+Las gráficas muestran que el precio por metro cuadrado de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `price.m2` no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable `price.m2` no sigue una distribución normal.
 
-### Homocedasticidad de *price.m2* por barrios
+### Homocedasticidad de `price.m2` por barrios
 
 Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde. Como los datos no siguen una distribución normal, se ha de utilizar el test de Fligner-Killeen, la alternativa no paramétrica al test de Levene.
 
 ```{r}
 fligner.test(price.m2 ~ location, data=selected.houses)
 ```
-El test de Fligner-Killeen produce un p-value < \alpha = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios.
+El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios.
 
-### Homocedasticidad de *price.m2* por barrios y alturas
+### Homocedasticidad de `price.m2` por barrios y alturas
 
 Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde, según la altura a la que está situada la vivienda. Como los datos no siguen una distribución normal, se ha de utilizar el test de Fligner-Killeen, la alternativa no paramétrica al test de Levene.
 
@@ -722,7 +722,7 @@ selected.houses.location.height <- selected.houses %>%
 
 fligner.test(price.m2 ~ location.height.clasification, data=selected.houses.location.height)
 ```
-El test de Fligner-Killeen produce un p-value < \alpha = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios y criterios de altura.
+El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios y criterios de altura.
 
 
 ## Pruebas estadísticas
