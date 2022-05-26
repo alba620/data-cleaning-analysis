@@ -197,11 +197,11 @@ str(selected.houses)
 
 # Limpieza de los datos
 
-Tras haber seleccionado los datos útiles, el siguiente paso en el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o ***missing data***, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los $m^2$) para inspeccionar la existencia de valores extremos o ***outliers***. Sin embargo, tanto en la visualización de registros aleatorios del *dataframe* como en el estudio de la estructura, se ha detectado que hay campos que todavía deben tratarse mediante un proceso de **transformación previa** ya que su resultado puede afectar tanto a la gestión de *missing data* como de *outliers*. 
+Tras haber seleccionado los datos útiles, el siguiente paso hacia el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o ***missing data***, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los $m^2$) para inspeccionar la existencia de valores extremos o ***outliers***. Sin embargo, tanto en la visualización de registros aleatorios del *dataframe* como en el estudio de la estructura, se ha detectado que hay campos que todavía deben tratarse mediante un proceso de **transformación previa** ya que su resultado puede afectar tanto a la gestión de *missing data* como de *outliers*. 
 
 ## Transformaciones previas
 
-Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al mismo concepto. Se procede a comprobar los valores de estos campos para decidir sobre su necesidad de unificarlos:
+Varios de los campos del *dataset* son factores y pueden albergar valores ligeramente distintos que hagan referencia al **mismo concepto**. Se procede a comprobar los valores de estos campos para decidir sobre su necesidad de unificarlos:
 
 ```{r}
 levels(selected.houses$location)
@@ -209,7 +209,7 @@ levels(selected.houses$floor)
 levels(selected.houses$source)
 ```
 
-El campo ***source*** contiene solo los valores esperados. El campo ***location*** contiene un nivel incorrecto y el campo ***floor*** contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide descartar la información de si la vivienda es interior o exterior y si posee o no ascensor contenida en *floor*, por lo que se cambiará el tipo de dato de *floor* a entero, cuya información será útil en futuros análisis.
+El campo ***source*** contiene solo los valores esperados. El campo ***location*** contiene un nivel incorrecto y el campo ***floor*** contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide descartar la información de si la vivienda es interior o exterior y si posee o no ascensor contenida en *floor*, dejando como valor de *floor* su planta, cuya información será útil en futuros análisis.
 
 Para ello, en primer lugar se eliminan los **niveles incorrectos** de *location* y *floor*:
 
@@ -240,7 +240,8 @@ kable(colSums(is.na(selected.houses)),
   kable_styling(bootstrap_options = Form.Basic) %>%
     scroll_box(width = "100%", height = "470px")
 ```
-Como se puede observar, el campo *rooms* es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables *id*, *price* o *floor*:
+
+Como se puede observar, el campo *rooms* es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables ***id***, ***price*** y ***floor***:
 
 ```{r}
 selected.houses[is.na(selected.houses$id) | 
@@ -256,13 +257,13 @@ selected.houses <- selected.houses[!is.na(selected.houses$id) &
                                      !is.na(selected.houses$floor),]
 ```
 
-Se procede ahora a analizar los registros con valores perdidos en el campo *rooms* y, para ello, se decide mostrar todos los registros en busca de un patrón:
+Se procede ahora a analizar los registros con valores perdidos en el campo ***rooms*** y, para ello, se decide mostrar todos los registros en busca de un patrón:
 
 ```{r}
 selected.houses[is.na(selected.houses$rooms),]
 ```
 
-Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo *rooms*. Se trata del `r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros pero se observa claramente que se trata de viviendas que proceden de Idealista. Se verifica dicha suposición:
+Se trata de `r sum(is.na(selected.houses$rooms))` registros que no tienen valor en el campo ***rooms***. Se trata del `r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`% del total de registros pero, se observa claramente que se trata de viviendas que proceden de **Idealista**. Se verifica dicha suposición:
 
 ```{r}
 if(length(which(is.na(selected.houses$rooms))) == 
@@ -272,13 +273,16 @@ if(length(which(is.na(selected.houses$rooms))) ==
   print("El número de viviendas sin valor en 'rooms' NO es igual al de procedentes de Idealista.")
 }
 ```
-Por tanto, se decide **mantener todos los registros** sin valor en *rooms* y se tiene en cuenta para futuros análisis que si se quiere emplear esta variable solamente se podrán tener en cuentra las viviendas procedentes del portal web de **Fotocasa**. Otras opciones habrían contemplado eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
+
+Por tanto, se decide **mantener todos los registros** sin valor en *rooms* y se tiene en cuenta para futuros análisis que si se quiere emplear esta variable solamente se podrán analizar las viviendas procedentes del portal web de **Fotocasa**. Otras opciones habrían contemplado eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
 
 ## Gestión de *outliers*
 
 Tras el trabajo que se ha realizado con los datos, se puede deducir que los **valores extremos**, o *outliers*, solo pueden encontrarse en las variables *price*, *m2*, *rooms*, *floor* (en este momento categórica), *num.photos*, *price.m2* y *description.length*.
 
-Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja y se decide qué hacer con los candidatos a *outliers*. 
+Como en la primera entrega de este proyecto (Práctica 1) ya se determinó que los barrios de Salamanca y Villaverde de Madrid se encuentran en los extremos de precios dentro de la ciudad según todas las fuentes consultadas, para no distorsionar el análisis de *outliers*, se ha opta por estudiar cada variable según la **ubicación de la vivienda**. 
+
+Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja **interactivos** que facilitan la identificación de los registros, comprensión e identificación, y se decide qué hacer con los candidatos a *outliers*. 
 
 En primer lugar, se analiza el **precio**:
 
@@ -291,25 +295,29 @@ plot_ly(y = ~ selected.houses$price,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del precio según el barrio")
 ```
-Que haya viviendas caras hasta tal punto que su precio parezca un posible valor extremo equivocado no debe sorprender en este proyecto debido a que el mercado inmobiliario se caracteriza precisamente por ello. En cualquier caso, para verificar que estos **precios son compatibles con la realidad**, se opta por extraer los registros de las viviendas sospechosas.
+
+Que haya viviendas caras hasta tal punto que su precio parezca un posible valor extremo equivocado no debe sorprender en este proyecto debido a que el mercado inmobiliario se caracteriza precisamente por ello. En cualquier caso, para verificar que estos **precios son compatibles con la realidad**, se opta por extraer los registros de las viviendas sospechosas:
 
 ```{r}
 villaverde.price <- selected.houses[selected.houses$price %in% 
-                  boxplot.stats(selected.houses$price[selected.houses$location == 'villaverde'])$out & 
+                  boxplot.stats(selected.houses$price[selected.houses$location == 
+                                                        'villaverde'])$out & 
                   selected.houses$location == 'villaverde' ,]
 
 salamanca.price <- selected.houses[selected.houses$price %in% 
-                  boxplot.stats(selected.houses$price[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  boxplot.stats(selected.houses$price[selected.houses$location == 
+                                                        'barrio-de-salamanca'])$out & 
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
-Tras estudiarlos en profundidad, se descubre que en ambos barrios los pisos considerados atípicamente caros también son **muy grandes** para la zona en la que se encuentran:
+Tras estudiar los 165 registros en profundidad, se descubre que en ambos barrios los viviendas consideradas atípicamente caras también son **muy grandes** para la zona en la que se encuentran:
 
 ```{r}
 min(villaverde.price$m2)
 min(salamanca.price$m2)
 ```
-Por tanto se decide **no tratar** dichos registros a encontrarse dentro del rango de lo posible en este contexto, como se puede observar del tamaño mínimo de estas viviendas. 
+
+Por tanto se decide **no tratar** dichos registros al encontrarse dentro del rango de lo posible en este contexto, como se puede deducir del tamaño mínimo de estas viviendas. 
 
 A continuación se analiza el **precio por metro cuadrado**
 
@@ -322,22 +330,30 @@ plot_ly(y = ~ selected.houses$price.m2,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del precio por metro cuadrado según el barrio")
 ```
+
 Como en el caso anterior, se extraen los **registros de las viviendas** que tienen un precio atípicamente alto o bajo en relación con sus metros cuadradados para cada uno de los barrios de Madrid analizados:
 
 ```{r}
 villaverde.price.m2 <- selected.houses[selected.houses$price.m2 %in% 
-                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 'villaverde'])$out & 
+                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 
+                                                           'villaverde'])$out & 
                   selected.houses$location == 'villaverde' ,]
 
 salamanca.price.m2 <- selected.houses[selected.houses$price.m2 %in% 
-                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  boxplot.stats(selected.houses$price.m2[selected.houses$location == 
+                                                           'barrio-de-salamanca'])$out & 
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
-Tras estudiar los **51 registros** en profundidad, no se encuentra un patrón que pudiera explicar esta situación y los valores del resto de campos son coherentes con el ámbito de este proyecto. Si embargo, sí que se detecta que las tres viviendas con un precio más bajo por metro cuadradado en Villaverde no son tal, sino que se trata de **parcelas**, por lo que se procede a su eliminación: 
+Tras estudiar los **51 registros** en profundidad, no se encuentra un patrón que pudiera explicar esta situación y los valores del resto de campos son coherentes con el ámbito de este proyecto. Si embargo, sí que se detecta que las tres viviendas con un precio más bajo por metro cuadradado en Villaverde no son tal, sino que se trata de **parcelas** según se explica en el campo *description*, por lo que se procede a su eliminación: 
 
 ```{r}
-selected.houses <- subset(selected.houses, id!="162471798" & 
+
+selected.houses[(selected.houses$id == "162471798") | 
+                  (selected.houses$id == "159999857") | 
+                  (selected.houses$id == "162471885"),]
+selected.houses <- subset(selected.houses, 
+                          id != "162471798" & 
                             id != "159999857" & 
                             id !="162471885")
 ```
@@ -352,15 +368,18 @@ plot_ly(y = ~ selected.houses$m2,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de los metros cuadrados según el barrio")
 ```
-También se extraen los **registros de las viviendas** que tienen un tamaño atípicamente alto para cada uno de los barrios.:
+
+También se extraen los **registros de las viviendas** que tienen un tamaño atípicamente alto para cada uno de los barrios:
 
 ```{r}
 villaverde.m2 <- selected.houses[selected.houses$m2 %in% 
-                  boxplot.stats(selected.houses$m2[selected.houses$location == 'villaverde'])$out & 
+                  boxplot.stats(selected.houses$m2[selected.houses$location == 
+                                                     'villaverde'])$out & 
                   selected.houses$location == 'villaverde' ,]
 
 salamanca.m2 <- selected.houses[selected.houses$m2 %in% 
-                  boxplot.stats(selected.houses$m2[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  boxplot.stats(selected.houses$m2[selected.houses$location == 
+                                                     'barrio-de-salamanca'])$out & 
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
@@ -376,15 +395,18 @@ plot_ly(y = ~ selected.houses$rooms,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del número de habitaciones según el barrio")
 ```
+
 Se sigue el mismo procedimiento que antes, analizando por separado los posibles *outliers* pero, como era de esperar, las **4 viviendas** con más habitaciones también son más grandes, por lo que se decide **no tratar** estos registros.
 
 ```{r}
 villaverde.rooms <- selected.houses[selected.houses$rooms %in% 
-                  boxplot.stats(selected.houses$rooms[selected.houses$location == 'villaverde'])$out & 
+                  boxplot.stats(selected.houses$rooms[selected.houses$location == 
+                                                        'villaverde'])$out & 
                   selected.houses$location == 'villaverde' ,]
 
 salamanca.rooms <- selected.houses[selected.houses$rooms %in% 
-                  boxplot.stats(selected.houses$rooms[selected.houses$location == 'barrio-de-salamanca'])$out & 
+                  boxplot.stats(selected.houses$rooms[selected.houses$location == 
+                                                        'barrio-de-salamanca'])$out & 
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
@@ -394,11 +416,12 @@ A continuación se visualizan los candidatos a *outliers* según la **planta** e
 plot_ly(y = ~ selected.houses$floor, 
         color = ~ selected.houses$location, 
         type = "box") %>%
-  layout(yaxis = list( title = "Planta"), 
+  layout(yaxis = list(title = "Planta"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de la planta según el barrio")
 ```
-Según los datos del **Catastro** en el Barrio de Salamanca de Madrid **existen edificios** de 12 alturas y en el de Villaverde de 13, e incluso más en ambos casos, aunque no es lo más común. Por tanto, cabe la posibilidad de que las viviendas en venta se encuentren den dichas plantas, por lo que no es necesario profundizar en el análisis de estos datos o los registros completos. 
+
+Según los datos del **Catastro** en el Barrio de Salamanca de Madrid **existen edificios** de 12 alturas y en el de Villaverde de 13, e incluso más en ambos casos, aunque no es lo más común. Por tanto, cabe la posibilidad de que las viviendas en venta se encuentren en dichas plantas, por lo que no es necesario profundizar en el análisis de estos datos o los registros completos. 
 
 En cuanto al **número de fotografías**, los *boxplots* resultantes son los siguientes:
 
@@ -406,11 +429,12 @@ En cuanto al **número de fotografías**, los *boxplots* resultantes son los sig
 plot_ly(y = ~ selected.houses$num.photos, 
         color = ~ selected.houses$location, 
         type = "box") %>%
-  layout(yaxis = list( title = "Número de fotografías"), 
+  layout(yaxis = list(title = "Número de fotografías"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución del número de fotografías según el barrio")
 ```
-si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes anuncia una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto. 
+
+si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en el proceso de captura de los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes corresponde al de una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto: 
 
 ```{r}
 selected.houses[(selected.houses$num.photos = 194),]
@@ -426,13 +450,14 @@ plot_ly(y = ~ selected.houses$description.length,
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
          title = "Distribución de la longitud del anuncio según el barrio")
 ```
+
 Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000** y la de **Idealista** sube este máximo hasta los **5.000** caracteres, los marcados como posibles *outliers* se consideran registros dentro de lo posible, por lo que se decide mantenerlos sin actuar sobre ellos. 
 
-**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo era. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el siguiente apartado se llegará a conclusiones más precisas.
+**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo eran. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el apartado de Análisis se llegará a conclusiones más precisas.
 
 ## Conjunto de datos final
 
-Así, tras este proceso de *data cleaning* o limpieza de datos, el conjunto de datos final tiene las siguientes **características**:
+Tras este proceso de *data cleaning* o limpieza de datos, el conjunto de datos final tiene las siguientes **características**:
 
 ```{r}
 options(knitr.kable.NA = '')
