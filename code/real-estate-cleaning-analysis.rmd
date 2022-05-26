@@ -430,6 +430,29 @@ Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000*
 
 **Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo era. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el siguiente apartado se llegará a conclusiones más precisas.
 
+## Conjunto de datos final
+
+Así, tras este proceso de *data cleaning* o limpieza de datos, el conjunto de datos final tiene las siguientes **características**:
+
+```{r}
+options(knitr.kable.NA = '')
+kable(summary(selected.houses),
+      digits=2, 
+      align='l', 
+      caption="Datos resumen de cada variable") %>%
+  kable_styling(bootstrap_options = Form.Basic) %>%
+    scroll_box(width = "100%", height = "480px")
+```
+
+Por último, se guarda el **conjunto de datos final** en un **nuevo fichero*, que también estará disponible en el repositorio público:
+
+```{r}
+write.csv(selected.houses, 
+          file = '../data/real-estate.csv',
+          row.names = FALSE,
+          sep=',')
+```
+
 # Análisis de los datos
 
 
