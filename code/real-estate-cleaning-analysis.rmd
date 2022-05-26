@@ -529,42 +529,42 @@ salamanca.houses$m2.clasification <- as.factor(case_when(
 
 ```{r}
 selected.houses$heigth.clasification <- as.factor(case_when(
-                          as.numeric(selected.houses$floor) <= mean(as.numeric(selected.houses$floor)) ~ "bajo",    
-                          as.numeric(selected.houses$floor) > mean(as.numeric(selected.houses$floor))  ~ "alto"
+                          as.numeric(selected.houses$floor) <= 4 ~ "bajo",    
+                          as.numeric(selected.houses$floor) > 4  ~ "alto"
                           )) 
 
 villaverde.houses$heigth.clasification <- as.factor(case_when(
-                          as.numeric(villaverde.houses$floor) <= mean(as.numeric(villaverde.houses$floor)) ~ "bajo",    
-                          as.numeric(villaverde.houses$floor) > mean(as.numeric(villaverde.houses$floor))  ~ "alto"
+                          as.numeric(villaverde.houses$floor) <= 4 ~ "bajo",    
+                          as.numeric(villaverde.houses$floor) > 4  ~ "alto"
                           )) 
 
 salamanca.houses$heigth.clasification <- as.factor(case_when(
-                          as.numeric(salamanca.houses$floor) <= mean(as.numeric(salamanca.houses$floor)) ~ "bajo",    
-                          as.numeric(salamanca.houses$floor) > mean(as.numeric(salamanca.houses$floor))  ~ "alto"
+                          as.numeric(salamanca.houses$floor) <= 4 ~ "bajo",    
+                          as.numeric(salamanca.houses$floor) > 4 ~ "alto"
                           )) 
 ```
 
 Gracias a las variables creadas, se realizan **nuevas agrupaciones** de manera que las viviendas se agrupan además en caras o baratas, grandes o pequeñas y altas o bajas teniendo como referencia para este criterio el barrio en el que se encuentren:
 
 ```{r}
-cheap.houses <- villaverde.houses[villaverde.houses$price.clasification == "barato",] %>% 
-  full_join(salamanca.houses[salamanca.houses$price.clasification == "barato",])
-expensive.houses <- villaverde.houses[villaverde.houses$price.clasification == "caro",] %>% 
-  full_join(salamanca.houses[salamanca.houses$price.clasification == "caro",])
+cheap.houses <- bind_rows(villaverde.houses[villaverde.houses$price.clasification == "barato",],
+                          salamanca.houses[salamanca.houses$price.clasification == "barato",])
+expensive.houses <- bind_rows(villaverde.houses[villaverde.houses$price.clasification == "caro",],
+                              salamanca.houses[salamanca.houses$price.clasification == "caro",])
 ```
 
 ```{r}
-small.houses <- villaverde.houses[villaverde.houses$m2.clasification == "pequeño",] %>% 
-  full_join(salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
-big.houses <- villaverde.houses[villaverde.houses$m2.clasification == "grande",] %>% 
-  full_join(salamanca.houses[salamanca.houses$m2.clasification == "grande",])
+small.houses <- bind_rows(villaverde.houses[villaverde.houses$m2.clasification == "pequeño",], 
+                          salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
+big.houses <- bind_rows(villaverde.houses[villaverde.houses$m2.clasification == "grande",], 
+                        salamanca.houses[salamanca.houses$m2.clasification == "grande",])
 ```
 
 ```{r}
-lower.floors.houses <- villaverde.houses[villaverde.houses$heigth.clasification == "bajo",] %>% 
-  full_join(salamanca.houses[salamanca.houses$heigth.clasification == "bajo",])
-upper.floors.houses <- villaverde.houses[villaverde.houses$heigth.clasification == "alto",] %>% 
-  full_join(salamanca.houses[salamanca.houses$heigth.clasification == "alto",])
+lower.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clasification == "bajo",], 
+                                 salamanca.houses[salamanca.houses$heigth.clasification == "bajo",])
+upper.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clasification == "alto",], 
+                                 salamanca.houses[salamanca.houses$heigth.clasification == "alto",])
 ```
 
 ## Comprobación de normalidad y homocedasticidad
