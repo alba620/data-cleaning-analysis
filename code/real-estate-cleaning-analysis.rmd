@@ -280,7 +280,7 @@ Por tanto, se decide **mantener todos los registros** sin valor en *rooms* y se 
 
 Tras el trabajo que se ha realizado con los datos, se puede deducir que los **valores extremos**, o *outliers*, solo pueden encontrarse en las variables *price*, *m2*, *rooms*, *floor* (en este momento categórica), *num.photos*, *price.m2* y *description.length*.
 
-Como en la primera entrega de este proyecto (Práctica 1) ya se determinó que los barrios de Salamanca y Villaverde de Madrid se encuentran en los extremos de precios dentro de la ciudad según todas las fuentes consultadas, para no distorsionar el análisis de *outliers*, se ha opta por estudiar cada variable según la **ubicación de la vivienda**. 
+Como en la primera entrega de este proyecto (Práctica 1) ya se determinó que los barrios de Salamanca y Villaverde de Madrid se encuentran en los extremos de precios dentro de la ciudad según todas las fuentes consultadas, para no distorsionar el análisis de *outliers*, se opta por estudiar cada variable según la **ubicación de la vivienda**. 
 
 Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja **interactivos** que facilitan la identificación de los registros, comprensión e identificación, y se decide qué hacer con los candidatos a *outliers*. 
 
@@ -440,7 +440,7 @@ si bien es cierto que el número máximo de fotografías en **Fotocasa** es de *
 selected.houses[(selected.houses$num.photos = 194),]
 ```
 
-Por úlimo, se evalúa la variable que recoge la longitud de la descripción en caracteres:
+Por úlimo, se evalúa la variable que recoge la longitud de la **descripción en caracteres**:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$description.length, 
@@ -469,7 +469,7 @@ kable(summary(selected.houses),
     scroll_box(width = "100%", height = "480px")
 ```
 
-Por último, se guarda el **conjunto de datos final** en un **nuevo fichero*, que también estará disponible en el repositorio público:
+Por último, se guarda el **conjunto de datos final** en un **nuevo fichero**, que también estará disponible en el repositorio público:
 
 ```{r}
 write.csv(selected.houses, 
@@ -480,9 +480,92 @@ write.csv(selected.houses,
 
 # Análisis de los datos
 
+BLABLABLA
 
 ## Selección de grupos de datos
 
+Teniendo en cuenta los **objetivos** marcados en la introducción y el resultado de las exploraciones realizadas en apartados anteriores, a continuación se **agrupan** las viviendas según el barrio:
+
+```{r}
+villaverde.houses <- selected.houses[selected.houses$location == "villaverde",]
+salamanca.houses <- selected.houses[selected.houses$location == "barrio-de-salamanca",]
+```
+
+Además, se crean nuevas variables para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes:
+
+```{r}
+selected.houses$price.clasification <- as.factor(case_when(
+                          selected.houses$price.m2 <= mean(selected.houses$price.m2) ~ "barato",    
+                          selected.houses$price.m2 > mean(selected.houses$price.m2)  ~ "caro"
+                          )) 
+
+villaverde.houses$price.clasification <- as.factor(case_when(
+                          villaverde.houses$price.m2 <= mean(villaverde.houses$price.m2) ~ "barato",    
+                          villaverde.houses$price.m2 > mean(villaverde.houses$price.m2)  ~ "caro"
+                          )) 
+
+salamanca.houses$price.clasification <- as.factor(case_when(
+                          salamanca.houses$price.m2 <= mean(salamanca.houses$price.m2) ~ "barato",    
+                          salamanca.houses$price.m2 > mean(salamanca.houses$price.m2)  ~ "caro"
+                          )) 
+```
+
+```{r}
+selected.houses$m2.clasification <- as.factor(case_when(
+                          selected.houses$m2 <= mean(selected.houses$m2) ~ "pequeño",    
+                          selected.houses$m2 > mean(selected.houses$m2)  ~ "grande"
+                          )) 
+
+villaverde.houses$m2.clasification <- as.factor(case_when(
+                          villaverde.houses$m2 <= mean(villaverde.houses$m2) ~ "pequeño",    
+                          villaverde.houses$m2 > mean(villaverde.houses$m2)  ~ "grande"
+                          )) 
+
+salamanca.houses$m2.clasification <- as.factor(case_when(
+                          salamanca.houses$m2 <= mean(salamanca.houses$m2) ~ "pequeño",    
+                          salamanca.houses$m2 > mean(salamanca.houses$m2)  ~ "grande"
+                          )) 
+```
+
+```{r}
+selected.houses$heigth.clasification <- as.factor(case_when(
+                          as.numeric(selected.houses$floor) <= mean(as.numeric(selected.houses$floor)) ~ "bajo",    
+                          as.numeric(selected.houses$floor) > mean(as.numeric(selected.houses$floor))  ~ "alto"
+                          )) 
+
+villaverde.houses$heigth.clasification <- as.factor(case_when(
+                          as.numeric(villaverde.houses$floor) <= mean(as.numeric(villaverde.houses$floor)) ~ "bajo",    
+                          as.numeric(villaverde.houses$floor) > mean(as.numeric(villaverde.houses$floor))  ~ "alto"
+                          )) 
+
+salamanca.houses$heigth.clasification <- as.factor(case_when(
+                          as.numeric(salamanca.houses$floor) <= mean(as.numeric(salamanca.houses$floor)) ~ "bajo",    
+                          as.numeric(salamanca.houses$floor) > mean(as.numeric(salamanca.houses$floor))  ~ "alto"
+                          )) 
+```
+
+Gracias a las variables creadas, se realizan **nuevas agrupaciones** de manera que las viviendas se agrupan además en caras o baratas, grandes o pequeñas y altas o bajas teniendo como referencia para este criterio el barrio en el que se encuentren:
+
+```{r}
+cheap.houses <- villaverde.houses[villaverde.houses$price.clasification == "barato",] %>% 
+  full_join(salamanca.houses[salamanca.houses$price.clasification == "barato",])
+expensive.houses <- villaverde.houses[villaverde.houses$price.clasification == "caro",] %>% 
+  full_join(salamanca.houses[salamanca.houses$price.clasification == "caro",])
+```
+
+```{r}
+small.houses <- villaverde.houses[villaverde.houses$m2.clasification == "pequeño",] %>% 
+  full_join(salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
+big.houses <- villaverde.houses[villaverde.houses$m2.clasification == "grande",] %>% 
+  full_join(salamanca.houses[salamanca.houses$m2.clasification == "grande",])
+```
+
+```{r}
+lower.floors.houses <- villaverde.houses[villaverde.houses$heigth.clasification == "bajo",] %>% 
+  full_join(salamanca.houses[salamanca.houses$heigth.clasification == "bajo",])
+upper.floors.houses <- villaverde.houses[villaverde.houses$heigth.clasification == "alto",] %>% 
+  full_join(salamanca.houses[salamanca.houses$heigth.clasification == "alto",])
+```
 
 ## Comprobación de normalidad y homocedasticidad
 
