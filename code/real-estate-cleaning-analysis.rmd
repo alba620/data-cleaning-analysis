@@ -32,6 +32,7 @@ knitr::knit_hooks$set(inline = function(x) {
   if(!is.numeric(x)){x}
   else{prettyNum(round(x,2), big.mark='.', decimal.mark=',')}
   })
+
 # carga de librerias
 if (!require('tidyverse')) install.packages('tidyverse'); library('tidyverse')
 if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
@@ -44,6 +45,9 @@ if (!require('scales')) install.packages('scales'); library('scales')
 if (!require('RColorBrewer')) install.packages('RColorBrewer'); library('RColorBrewer')
 if(!require('ggpubr')) install.packages('ggpubr'); library('ggpubr')
 if(!require('kableExtra')) install.packages('kableExtra'); library('kableExtra')
+if (!require('nortest')) install.packages('nortest'); library('nortest')
+if (!require('car')) install.packages('car'); library('car')
+
 # definicion de colores
 default.color.main <- '#F8766D'
 default.color.secondary <- '#00BFC4'
@@ -54,6 +58,7 @@ default.color.six <- '#1C1D21'
 default.color.seven <- '#003049'
 default.color.eight <- '#8A2E3A'
 default.color.nine <- '#093824'
+
 # beautify plots
 ggally.dist.aes <- list(continuous=wrap('points', shape=21))
 palette <- c(default.color.main, default.color.secondary, 
@@ -71,6 +76,7 @@ title.centered <- theme(
   )
 no.axis.y <- theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
 no.axis.x <- theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
 # seed
 seed <- 50L
 set.seed(seed)
@@ -528,17 +534,17 @@ salamanca.houses$m2.clasification <- as.factor(case_when(
 ```
 
 ```{r}
-selected.houses$heigth.clasification <- as.factor(case_when(
+selected.houses$height.clasification <- as.factor(case_when(
                           as.numeric(selected.houses$floor) <= 4 ~ "bajo",    
                           as.numeric(selected.houses$floor) > 4  ~ "alto"
                           )) 
 
-villaverde.houses$heigth.clasification <- as.factor(case_when(
+villaverde.houses$height.clasification <- as.factor(case_when(
                           as.numeric(villaverde.houses$floor) <= 4 ~ "bajo",    
                           as.numeric(villaverde.houses$floor) > 4  ~ "alto"
                           )) 
 
-salamanca.houses$heigth.clasification <- as.factor(case_when(
+salamanca.houses$height.clasification <- as.factor(case_when(
                           as.numeric(salamanca.houses$floor) <= 4 ~ "bajo",    
                           as.numeric(salamanca.houses$floor) > 4 ~ "alto"
                           )) 
@@ -568,6 +574,155 @@ upper.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clas
 ```
 
 ## Comprobación de normalidad y homocedasticidad
+
+Se procede a comprobar si las variables cuantitativas *price*, *m2* y *price.m2* cumplen los supuestos de normalidad. A su vez, también se comprobará si el precio por m^2 cumple el supuesto de homocedasticidad para las viviendas agrupadas por barrio y las viviendas agrupadas por barrio y altura.
+
+### Normalidad de la variable *price*
+
+Se procede a realizar las comprobaciones de normalidad en la variable `price`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
+
+```{r fig.height=5, fig.width=10}
+price.n <- length(selected.houses$price)
+price.mean <- mean(selected.houses$price)
+price.sd <- sd(selected.houses$price)
+
+ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
+          ggplot(selected.houses, aes(x=price)) +
+            geom_density(mapping=aes(y=..density..), fill=default.color.main) +
+            geom_vline(xintercept=price.mean, size=1.05,
+                       linetype='dashed', color='gray50') +
+            stat_function(fun=dnorm, args=c(mean=price.mean,
+                                            sd=price.sd),
+                          color=default.color.secondary, size=1.15) +
+            no.axis.y + xlab('Precio') + ylab('') + title.centered +
+            ggtitle('Distribución de los precios de las viviendas', 
+                    subtitle='Respecto a una distribución normal'),
+          
+          ggqqplot(selected.houses$price, color=default.color.main, 
+                   ggtheme = theme_gray(), xlab='Cuantiles teóricos', 
+                   ylab='Cuantiles de la muestra', title='Gráfico Q-Q', 
+                   shape=16) + title.centered + xlab('') + ylab('')
+          )
+
+lillie.test(selected.houses$price)
+```
+
+Las gráficas muestran que el precio de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `precio` no es normal (p-value < \alpha = 0.05). Sin embargo, la variable `precio` parece seguir una distribución log-normal; es decir, el logaritmo del precio puede seguir una distribución normal. Se procede a comprobar dicha hipótesis:
+
+```{r fig.height=5, fig.width=10}
+selected.houses <- selected.houses %>% plyr::mutate(price.log = log(price))
+price.log.n <- length(selected.houses$price.log)
+price.log.mean <- mean(selected.houses$price.log)
+price.log.sd <- sd(selected.houses$price.log)
+
+ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
+          ggplot(selected.houses, aes(x=price.log)) +
+            geom_density(mapping=aes(y=..density..), fill=default.color.main) +
+            geom_vline(xintercept=price.log.mean, size=1.05,
+                       linetype='dashed', color='gray50') +
+            stat_function(fun=dnorm, args=c(mean=price.log.mean,
+                                            sd=price.log.sd),
+                          color=default.color.secondary, size=1.15) +
+            no.axis.y + xlab('Log(Precio)') + ylab('') + title.centered +
+            ggtitle('Distribución de los precios de las viviendas', 
+                    subtitle='Respecto a una distribución normal'),
+          
+          ggqqplot(selected.houses$price.log, color=default.color.main, 
+                   ggtheme = theme_gray(), xlab='Cuantiles teóricos', 
+                   ylab='Cuantiles de la muestra', title='Gráfico Q-Q', 
+                   shape=16) + title.centered + xlab('') + ylab('')
+          )
+
+lillie.test(selected.houses$price.log)
+```
+
+La variable `precio` tampoco sigue una distribución log-normal, según se aprecia tanto en los gráficos (colas muy pesadas en el qqplot) como en el test de Lilliefors (p-value < \alpha = 0.05). Se concluye por tanto que la variable `precio` no sigue una distribución normal.
+
+### Normalidad de la variable *m2*
+
+Se procede a realizar las comprobaciones de normalidad en la variable `m2`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
+
+```{r fig.height=5, fig.width=10}
+m2.n <- length(selected.houses$m2)
+m2.mean <- mean(selected.houses$m2)
+m2.sd <- sd(selected.houses$m2)
+
+ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
+          ggplot(selected.houses, aes(x=m2)) +
+            geom_density(mapping=aes(y=..density..), fill=default.color.main) +
+            geom_vline(xintercept=m2.mean, size=1.05,
+                       linetype='dashed', color='gray50') +
+            stat_function(fun=dnorm, args=c(mean=m2.mean,
+                                            sd=m2.sd),
+                          color=default.color.secondary, size=1.15) +
+            no.axis.y + xlab('m^2') + ylab('') + title.centered +
+            ggtitle('Distribución de los m^2 de las viviendas', 
+                    subtitle='Respecto a una distribución normal'),
+          
+          ggqqplot(selected.houses$m2, color=default.color.main, 
+                   ggtheme = theme_gray(), xlab='Cuantiles teóricos', 
+                   ylab='Cuantiles de la muestra', title='Gráfico Q-Q', 
+                   shape=16) + title.centered + xlab('') + ylab('')
+          )
+
+lillie.test(selected.houses$m2)
+```
+
+Las gráficas muestran que la superficie (m^2) de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `m2` no es normal (p-value < \alpha = 0.05). Se concluye por tanto que la variable `m2` no sigue una distribución normal.
+
+### Normalidad de la variable *price.m2*
+
+Se procede a realizar las comprobaciones de normalidad en la variable `price.m2`, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
+
+```{r fig.height=5, fig.width=10}
+price.m2.n <- length(selected.houses$price.m2)
+price.m2.mean <- mean(selected.houses$price.m2)
+price.m2.sd <- sd(selected.houses$price.m2)
+
+ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
+          ggplot(selected.houses, aes(x=price.m2)) +
+            geom_density(mapping=aes(y=..density..), fill=default.color.main) +
+            geom_vline(xintercept=price.m2.mean, size=1.05,
+                       linetype='dashed', color='gray50') +
+            stat_function(fun=dnorm, args=c(mean=price.m2.mean,
+                                            sd=price.m2.sd),
+                          color=default.color.secondary, size=1.15) +
+            no.axis.y + xlab('Precio/m2') + ylab('') + title.centered +
+            ggtitle('Distribución de los precios de las viviendas', 
+                    subtitle='Respecto a una distribución normal'),
+          
+          ggqqplot(selected.houses$price.m2, color=default.color.main, 
+                   ggtheme = theme_gray(), xlab='Cuantiles teóricos', 
+                   ylab='Cuantiles de la muestra', title='Gráfico Q-Q', 
+                   shape=16) + title.centered + xlab('') + ylab('')
+          )
+
+lillie.test(selected.houses$price.m2)
+```
+
+Las gráficas muestran que el precio por metro cuadrado de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable `price.m2` no es normal (p-value < \alpha = 0.05). Se concluye por tanto que la variable `price.m2` no sigue una distribución normal.
+
+### Homocedasticidad de *price.m2* por barrios
+
+Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde. Como los datos no siguen una distribución normal, se ha de utilizar el test de Fligner-Killeen, la alternativa no paramétrica al test de Levene.
+
+```{r}
+fligner.test(price.m2 ~ location, data=selected.houses)
+```
+El test de Fligner-Killeen produce un p-value < \alpha = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios.
+
+### Homocedasticidad de *price.m2* por barrios y alturas
+
+Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde, según la altura a la que está situada la vivienda. Como los datos no siguen una distribución normal, se ha de utilizar el test de Fligner-Killeen, la alternativa no paramétrica al test de Levene.
+
+```{r}
+selected.houses.location.height <- selected.houses %>%
+  dplyr::mutate(location.height.clasification=as.factor(
+    paste0(as.character(location),'-',as.character(height.clasification))))
+
+fligner.test(price.m2 ~ location.height.clasification, data=selected.houses.location.height)
+```
+El test de Fligner-Killeen produce un p-value < \alpha = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene varianzas estadísticamente diferentes para ambos barrios y criterios de altura.
 
 
 ## Pruebas estadísticas
