@@ -22,6 +22,11 @@ lang: es
 h4 {
   text-align: center;
 }
+
+.table caption {
+    color: dimgray;
+    font-weight: bold;
+}
 ```
 
 ```{r setup, include=FALSE}
