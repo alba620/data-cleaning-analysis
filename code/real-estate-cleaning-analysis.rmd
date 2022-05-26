@@ -733,11 +733,45 @@ El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se r
 
 ## Pruebas estadísticas
 
+BLABLABLÁ
+
+### Diferencia de precio entre barrios
+
+Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el Barrio de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
+
+Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas de ambos barrios. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
+
+-  H$_0$ : $\mu$ precio por m$^2$ B. Salamanca = $\mu$ precio m$^2$ B. Villaverde
+-  H$_1$ : $\mu$ precio por m$^2$ B. Salamanca > $\mu$ precio m$^2$ B. Villaverde
+
+Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
+
+En consecuencia, se puede realizar un test de hipótesis de dos muestras independientes sobre la media, con distribución normal, unilateral por la derecha y teniendo en cuenta que las varianzas poblacionales son desconocidas y diferentes. Por ello, se opta en primer lugar por la prueba **t de Student**:
+
+```{r}
+t.test(salamanca.houses$price.m2,
+       villaverde.houses$price.m2,
+       alternative = "greater")
+```
+
+Como era previsible el valor del **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa.
+
+No obstante, si no se hubiera aplicado el teorema del límite central y se hubiera atendido al resultado del test de Lilliefors, se habría tenido que aplicar un **test no paramétrico**. Para verificar la calidad del resultado anterior se realiza el **test de Mann-Whitney**:
+
+```{r}
+wilcox.test(salamanca.houses$price.m2, 
+            villaverde.houses$price.m2,
+            alternative = "greater")
+```
+El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
+ 
+En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos barrios sea el mismo y se determina que este valor es **significativamente mayor** en el Barrio de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
+
 # Conclusiones
 
 # Tabla de contribuciones
 
-A continuación se muestra cómo ambos miembros del equipo han participado en todas las tareas de este proyecto colaborativo: 
+A continuación se muestra cómo ambos miembros del equipo han participado en **todas las tareas** de este proyecto colaborativo: 
 
 ```{r, echo=FALSE}
 contributions.table <- data.frame(Contribuciones = c("Investigación previa", 
