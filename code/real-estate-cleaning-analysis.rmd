@@ -735,7 +735,38 @@ El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se r
 
 BLABLABLÁ
 
-### Diferencia de precio entre barrios
+### ¿Qué características influyen más en el precio de la vivienda?
+
+Se desea saber cuáles de todas las características influye más en el precio fijado para la vivienda en el anuncio. Estas características pueden ser tanto de la propia vivienda (m$^2$ o altura) como las características del anuncio (el número de fotos o la longitud de la descripción).
+
+Se procede a realizar un estudio de las correlaciones entre la variable `price` y el resto de variables numéricas (`m2`, `price.m2`, `description.length`). No se utiliza `num.photos` dado que no todos los registros tienen valores para este campo; sin embargo, se utilizará más adelante para otros propósitos.
+
+Se utiliza el coeficiente de correlación de Spearman, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal.
+
+```{r}
+corr.houses <- selected.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
+  dplyr::rename(desc.len=description.length)
+
+cor(corr.houses, use='complete.obs', method='spearman')
+
+cor.test(corr.houses$price, corr.houses$m2, method='spearman')
+cor.test(corr.houses$price, corr.houses$desc.len, method='spearman')
+cor.test(corr.houses$price, corr.houses$price.m2, method='spearman')
+cor.test(corr.houses$price.m2, corr.houses$m2, method='spearman')
+
+ggcorr(corr.houses, method=c('complete.obs', 'spearman'), name='Corr. coef.',
+       label=TRUE, label_alpha=TRUE, legend.position='left') +
+  title.centered + ggtitle('Matriz de correlaciones') +
+  theme(legend.title=element_text(face='bold', size=10))
+```
+
+Todos los resultados se han contrastado mediante un contraste de hipótesis para comprobar su nivel de significancia; con un $\alpha = 0.05$ se puede afirmar que los resultados son estadísticamente significativos.
+
+Se observa que los m$^2$ de la vivienda son los que más afectan a la hora de decidir el precio de la misma. La longitud de la descripción no tiene una relación lineal con el precio; mientras que el precio por m$^2$ sí que tiene una fuerte correlación con el precio. Este último resultado era esperado, dado que `price.m2` es una variable derivada de `price` y `m2`.
+
+Otras conclusiones interesantes que arroja la matriz de correlaciones son las relaciones entre el precio por m$^2$, el precio y los m$^2$. Mientras que se esperaba que la correlación entre `price` y `price.m2` fuera fuertemente positiva, sorprende la débil correlación positiva entre `price.m2` y `m2`, que viene a significar que cuantos más metros cuadrados tenga la vivienda, mayor será el precio por m$^2$. Esto quiere decir que el precio/m$^2$ de una vivienda también se ve afectado por los m$^2$ de la misma de forma positiva; es decir, cuanto más grande sea la vivienda, más caro será el m$^2$ de la misma.
+
+### ¿Existen diferencias en el precio de la vivienda según el barrio?
 
 Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el Barrio de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
 
