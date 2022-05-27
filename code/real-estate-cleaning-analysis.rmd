@@ -222,18 +222,12 @@ levels(selected.houses$source)
 
 El campo **`source`** contiene solo los valores esperados. El campo **`location`** contiene un nivel incorrecto y el campo **`floor`** contiene información redundante en varios niveles, además de un nivel incorrecto. Se decide descartar la información de si la vivienda es interior o exterior y si posee o no ascensor contenida en **`floor`**, dejando como valor de **`floor`** su planta, cuya información será útil en futuros análisis.
 
-Para ello, en primer lugar se eliminan los **niveles incorrectos** de **`location`** y **`floor`**:
-
-```{r}
-selected.houses <- droplevels.data.frame(selected.houses)
-```
-
-A continuación, se modifica el campo **`floor`** para obtener únicamente la **planta de la vivienda**. Si la vivienda no tiene planta (el caso de "Sin planta"), se le asigna la planta 0, conclusión a la que se llega tras la exploración de los datos y verificación por la información del campo **`description`**: 
+Para ello,  se modifica el campo **`floor`** para obtener únicamente la **planta de la vivienda**. Si la vivienda no tiene planta (el caso de "Sin planta" o "floor"), se le asigna la planta 0, conclusión a la que se llega tras la exploración de los datos y verificación por la información del campo **`description`**: 
 
 ```{r}
 selected.houses <- selected.houses %>% 
   dplyr::mutate(floor=as.character(floor)) %>%
-  dplyr::mutate(floor=ifelse(floor=='Sin planta', '0', floor)) %>%
+  dplyr::mutate(floor=ifelse(floor %in% c('Sin planta', 'floor'), '0', floor)) %>%
   dplyr::mutate(floor=readr::parse_number(floor)) %>% 
   dplyr::mutate(floor=as.factor(floor))
 levels(selected.houses$floor)
@@ -286,6 +280,13 @@ if(length(which(is.na(selected.houses$rooms))) ==
 ```
 
 Por tanto, se decide **mantener todos los registros** sin valor en **`rooms`** y se tiene en cuenta para futuros análisis que si se quiere emplear esta variable solamente se podrán analizar las viviendas procedentes del portal web de **Fotocasa**. Otras opciones habrían contemplado eliminar el campo completamente del *dataset*, predecir el número de habitaciones dado el resto de características o imputarles un valor arbitrario, como 0.
+
+Por último, se eliminan los niveles sin usar de los factores:
+
+```{r}
+selected.houses <- droplevels.data.frame(selected.houses)
+```
+
 
 ## Gestión de *outliers*
 
@@ -797,6 +798,29 @@ wilcox.test(salamanca.houses$price.m2,
 El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
  
 En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos barrios sea el mismo y se determina que este valor es **significativamente mayor** en el Barrio de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
+
+### Predicción del precio de una vivienda
+
+Por último, se desea crear un modelo de regresión lineal que permita predecir el precio de una vivienda dadas sus características físicas, es decir, solo aquellas pertenecientes a la vivienda y no al anuncio.
+
+Para dicho modelo, se va a utilizar la variable `price` como variable dependiente y las variables físicas de la vivienda `location`, `m2` y `floor` como variables independientes. No se utiliza la variable `price.m2` por ser un campo derivado de la variable dependiente. Tampoco se utiliza la variable `rooms` dados los valores perdidos.
+
+```{r}
+price.prediction.model <- lm(price~location+m2+floor, data=selected.houses)
+summary(price.prediction.model)
+```
+El modelo de regresión lineal para la predicción del precio de una vivienda dadas sus características físicas es estadísticamente significativo ($p-value < \alpha = 0.05$) y gracias al coeficiente de determinación $R^2$ se sabe que explica un 82% de la variación de precios de las viviendas.
+
+Además, se puede obtener información adicional del modelo. En primer lugar, se observa que si la vivienda se encuentra en el barrio de Villaverde, el precio de la misma baja drásticamente (-352.919,2€ menos que si la vivienda se encontrara en el barrio de Salamanca). Además, como ya se había visto anteriormente en el estudio de correlaciones, cuantos más m$^2$ tenga la vivienda, mayor será su precio.
+
+Por último, cabe destacar que tanto los m$^2$ como el barrio donde está situada la vivienda son estadísticamente significativos para el modelo; por otro lado, la planta en que se encuentra no es estadísticamente significativa. Se procede a crear un segundo modelo de regresión lineal sin esta última variable:
+
+```{r}
+price.prediction.model.sub <- lm(price~location+m2, data=selected.houses)
+summary(price.prediction.model.sub)
+```
+
+Se observa que el modelo sigue siendo estadísticamente significativo, así como los coeficientes de la localización y m$^2$ de la vivienda. El coeficiente de determinación $R^2_1 = 0.813$ frente al coeficiente de determinación del modelo completo $R^2_0 = 0.819$ indica que la planta en que se encuentra la vivienda solo captura un 0.6% de la variación de precios de las viviendas.
 
 # Conclusiones
 
