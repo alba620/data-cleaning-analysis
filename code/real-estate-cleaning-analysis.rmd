@@ -323,6 +323,7 @@ En primer lugar, se analiza el **precio**:
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$price, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(type = "log", 
                       title = "Precio en escala logarítmica"), 
@@ -358,6 +359,7 @@ A continuación se analiza el **precio por metro cuadrado**
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$price.m2, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(type = "log", 
                       title = "Precio por metro cuadrado en escala logarítmica"), 
@@ -397,6 +399,7 @@ Acabado el análisis sobre el precio, se pasa a estudiar el **tamaño**:
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$m2, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list( title = "Metros cuadrados"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
@@ -424,6 +427,7 @@ El siguiente paso es analizar el **número de habitaciones** teniendo en cuenta 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$rooms, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list( title = "Número de habitaciones"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
@@ -449,6 +453,7 @@ A continuación se visualizan los candidatos a *outliers* según la **planta** e
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$floor, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Planta"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
@@ -462,6 +467,7 @@ En cuanto al **número de fotografías**, los *boxplots* resultantes son los sig
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$num.photos, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Número de fotografías"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
@@ -479,6 +485,7 @@ Por úlimo, se evalúa la variable que recoge la longitud de la **descripción e
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$description.length, 
         color = ~ selected.houses$location, 
+        colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Longitud de la descripción"), 
          xaxis = list(title = "'Location' (barrio de la vivienda)"), 
@@ -820,6 +827,21 @@ Por tanto, la **pregunta de investigación** es si existe una diferencia signifi
 -  H$_0$ : $\mu$ precio por m$^2$ B. Salamanca = $\mu$ precio m$^2$ B. Villaverde
 -  H$_1$ : $\mu$ precio por m$^2$ B. Salamanca > $\mu$ precio m$^2$ B. Villaverde
 
+En primer lugar se observa la distribución de los datos por grupos:
+
+```{r fig.height=10, fig.width=10}
+GGally::ggpairs(dplyr::select(selected.houses, price.m2, location), 
+                mapping=aes(fill=factor(location)),
+                columns=c('price.m2', 'location'), proportions=c(1.5,1),
+                title='Distribución del precio/m2 por distrito', legend=4,
+                diag=list(continuous = wrap("densityDiag", alpha = 0.75))) +
+  scale_colour_manual(name='Distrito', values=palette) +
+  scale_fill_manual(name='Distrito', values=palette) +
+  theme(legend.position='bottom') + title.centered
+```
+
+El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Salamanca es superior al precio por metro cuadrado del distrito de Villaverde.
+
 Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
 
 En consecuencia, se puede realizar un test de hipótesis de dos muestras independientes sobre la media, con distribución normal, unilateral por la derecha y teniendo en cuenta que las varianzas poblacionales son desconocidas y diferentes. Por ello, se opta en primer lugar por la prueba **t de Student**:
@@ -854,6 +876,34 @@ Por tanto, la **pregunta de investigación** es si existe una diferencia signifi
 
 -  H$_{10}$ : $\mu$ precio por m$^2$ B. Villaverde | alto = $\mu$ precio por m$^2$ B. Villaverde | bajo
 -  H$_{11}$ : $\mu$ precio por m$^2$ B. Villaverde | alto > $\mu$ precio por m$^2$ B. Villaverde | bajo
+
+En primer lugar se observa la distribución de los datos por grupos, tanto en el distrito de Salamanca como en el de Villaverde:
+
+```{r fig.height=10, fig.width=10}
+GGally::ggpairs(dplyr::select(salamanca.houses, price.m2, height.clasification), 
+                mapping=aes(fill=factor(height.clasification)),
+                columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
+                title='Distribución del precio/m2 por altura (Salamanca)', legend=4,
+                diag=list(continuous = wrap("densityDiag", alpha = 0.75))) +
+  scale_colour_manual(name='Altura', values=palette) +
+  scale_fill_manual(name='Altura', values=palette) +
+  theme(legend.position='bottom') + title.centered
+```
+
+El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Salamanca es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
+
+```{r fig.height=10, fig.width=10}
+GGally::ggpairs(dplyr::select(villaverde.houses, price.m2, height.clasification), 
+                mapping=aes(fill=factor(height.clasification)),
+                columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
+                title='Distribución del precio/m2 por altura (Villaverde)', legend=4,
+                diag=list(continuous = wrap("densityDiag", alpha = 0.75))) +
+  scale_colour_manual(name='Altura', values=palette) +
+  scale_fill_manual(name='Altura', values=palette) +
+  theme(legend.position='bottom') + title.centered
+```
+
+El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Villaverde es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
 
 Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
 
