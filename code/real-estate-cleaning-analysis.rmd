@@ -89,9 +89,27 @@ set.seed(seed)
 
 # Introducción y descripción del *dataset*
 
+El conjunto de datos objeto de análisis de este trabajo es ["*Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022*"](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de Idealista y Fotocasa en el distrito más caro (Salamanca) y el distrito más barato (Villaverde) de Madrid, obtenidos en la Práctica 1 de esta asignatura.
+
+A partir de los datos inmobiliarios se pretende encontrar relaciones entre las características físicas de las viviendas; principalmente se investigan las relaciones que puedan tener las otras características con el precio de la vivienda. Además de describir las relaciones entre el precio y las viviendas, se busca realizar una comparativa de la situación del mercado inmobiliario entre ambos distritos.
+
+Concretamente, se va a responder a las siguientes preguntas:
+
+- ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
+
+- ¿Existen diferencias significativas en el precio de la vivienda según el barrio en el que esté localizada? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
+
+- ¿Son las viviendas situadas en plantas altas más caras que las viviendas en plantas más cercanas al suelo? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
+
+- ¿Existe una relación entre el tamaño de la vivienda y el número de habitaciones que esta posee? Para responder esta pregunta se realizará un **análisis de las correlaciones** entre las 2 variables afectadas.
+
+Por último, se creará un **modelo de regresión lineal** para predecir el precio de una vivienda dadas sus características físicas (no se tendrán en cuenta las características del anuncio).
+
+La información que se desprenda de este estudio es relevante para **agentes del mercado inmobiliario** -- agencias inmobiliarias, propietarios particulares que buscan vender un inmueble y personas que buscan comprar una vivienda, -- así como para terceros que estén interesados en la situación del mercado inmobiliario en dichas zonas de Madrid. Por último, este estudio también es relevante dentro de los **temas sociales**, como repartición de la riqueza y posibilidad de acceso a la vivienda.
+
 # Integración, selección y transformación de datos
 
-En primer lugar, se procede a **cargar los datos** *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022 para la Práctica 1 de esta asignatura. En dicho fichero, ya se encuentran integrados los registros obtenidos tras el proceso de *scraping* de Idealista y de Fotocasa, por lo que no es necesario realizar de nuevo el proceso para la fusión de los datos.
+En primer lugar, se procede a **cargar los datos** *raw* obtenidos del repositorio [Zenodo](https://zenodo.org/record/6423459), creado el 7 de abril de 2022. En dicho fichero, ya se encuentran integrados los registros obtenidos tras el proceso de *scraping* de Idealista y de Fotocasa, por lo que no es necesario realizar de nuevo el proceso para la fusión de los datos.
 
 ```{r}
 houses.raw <- read.csv('../data/real-estate-raw.csv', header=TRUE, sep=',', 
@@ -113,8 +131,10 @@ kbl(cbind(sapply(houses.raw, class)),
     caption="Tipo de datos de cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
   scroll_box(width = "100%", 
-             height = "400px")
+             height = "573px")
 ```
+
+## Gestión de elementos duplicados
 
 Para finalizar la fase de integración de los datos, se eliminan las **viviendas duplicadas**, es decir, aquellos anuncios que contengan la misma vivienda en venta. Para ello, se evalúa cuáles tienen idéntico el campo `description`, puesto que pueden ser anuncios diferentes (con diferente `id` o `source`) pero con el mismo contenido. Para profundizar en el asunto y poderlo analizar mejor se extraen en un nuevo *dataframe* las viviendas duplicadas según este criterio.
 
@@ -243,7 +263,7 @@ kable(colSums(is.na(selected.houses)),
       align='l', 
       caption="Valores nulos en cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
-    scroll_box(width = "100%", height = "470px")
+    scroll_box(width = "100%", height = "573px")
 ```
 
 Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`** y **`floor`**:
@@ -480,7 +500,7 @@ kable(summary(selected.houses),
       align='l', 
       caption="Datos resumen de cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
-    scroll_box(width = "100%", height = "480px")
+    scroll_box(width = "100%", height = "473px")
 ```
 
 Por último, se guarda el **conjunto de datos final** en un **nuevo fichero**, que también estará disponible en el repositorio público:
@@ -494,7 +514,9 @@ write.csv(selected.houses,
 
 # Análisis de los datos
 
-BLABLABLA
+Tras haber seleccionado y limpiado los datos útiles, el siguiente paso consiste en la selección de los grupos de datos y el propio análisis estadístico. En esta fase se particiona el conjunto de datos final según diferentes filtros, ya sea por barrio, precio, altura de la planta en que se encuentran, etcétera.
+
+Después de seleccionar los grupos de datos relevantes y antes de realizar las pruebas estadísticas, es necesario comprobar la normalidad y homocedasticidad de dichos datos, con el objetivo de escoger adecuadamente los tests estadísticos que aplicar en cada prueba. Por último, se ha de proceder a escoger las pruebas estadísticas que respondan a las preguntas planteadas.
 
 ## Selección de grupos de datos
 
@@ -747,7 +769,7 @@ El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se r
 
 ## Pruebas estadísticas
 
-BLABLABLÁ
+Tras comprobar que los datos no siguen una distribución normal y no tienen varianzas homogéneas, se concluye que se ha de elegir el test no paramétrico para las pruebas estadísticas correspondientes. Sin embargo, dado que el conjunto de datos tiene un tamaño considerable y las muestras son grandes (n > 30), también se ha de considerar la aplicación del **Teorema del Límite Central** (TLC), que asume una distribución aproximadamente normal y permite el uso de tests paramétricos en las pruebas estadísticas.
 
 ### ¿Qué características influyen más en el precio de la vivienda?
 
@@ -755,26 +777,35 @@ Se desea saber cuáles de todas las características influye más en el precio f
 
 Se procede a realizar un estudio de las correlaciones entre la variable `price` y el resto de variables numéricas (`m2`, `price.m2`, `description.length`). No se utiliza `num.photos` dado que no todos los registros tienen valores para este campo; sin embargo, se utilizará más adelante para otros propósitos.
 
-Se utiliza el coeficiente de correlación de Spearman, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal.
+Se utiliza el coeficiente de correlación de Spearman, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. Sin embargo, también se van a realizar las pruebas con el coeficiente de correlación de Pearson, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande.
 
 ```{r}
 corr.houses <- selected.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
 cor(corr.houses, use='complete.obs', method='spearman')
+cor(corr.houses, use='complete.obs', method='pearson')
 
 cor.test(corr.houses$price, corr.houses$m2, method='spearman')
+cor.test(corr.houses$price, corr.houses$m2, method='pearson')
 cor.test(corr.houses$price, corr.houses$desc.len, method='spearman')
+cor.test(corr.houses$price, corr.houses$desc.len, method='pearson')
 cor.test(corr.houses$price, corr.houses$price.m2, method='spearman')
-cor.test(corr.houses$price.m2, corr.houses$m2, method='spearman')
+cor.test(corr.houses$price, corr.houses$price.m2, method='pearson')
+cor.test(corr.houses$price.m2, corr.houses$m2, method='pearson')
 
 ggcorr(corr.houses, method=c('complete.obs', 'spearman'), name='Corr. coef.',
        label=TRUE, label_alpha=TRUE, legend.position='left') +
-  title.centered + ggtitle('Matriz de correlaciones') +
+  title.centered + ggtitle('Matriz de correlaciones (Spearman)') +
+  theme(legend.title=element_text(face='bold', size=10))
+
+ggcorr(corr.houses, method=c('complete.obs', 'pearson'), name='Corr. coef.',
+       label=TRUE, label_alpha=TRUE, legend.position='left') +
+  title.centered + ggtitle('Matriz de correlaciones (Pearson)') +
   theme(legend.title=element_text(face='bold', size=10))
 ```
 
-Todos los resultados se han contrastado mediante un contraste de hipótesis para comprobar su nivel de significancia; con un $\alpha = 0.05$ se puede afirmar que los resultados son estadísticamente significativos.
+Todos los resultados se han contrastado mediante un contraste de hipótesis para comprobar su nivel de significancia; con un $\alpha = 0.05$ se puede afirmar que los resultados son estadísticamente significativos tanto con tests paramétricos (coeficiente de correlación de Pearson) como con tests no paramétricos (coeficiente de correlación de Spearman).
 
 Se observa que los m$^2$ de la vivienda son los que más afectan a la hora de decidir el precio de la misma. La longitud de la descripción no tiene una relación lineal con el precio; mientras que el precio por m$^2$ sí que tiene una fuerte correlación con el precio. Este último resultado era esperado, dado que `price.m2` es una variable derivada de `price` y `m2`.
 
