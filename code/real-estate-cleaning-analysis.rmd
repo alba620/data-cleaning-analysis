@@ -6,6 +6,7 @@ output:
     theme: flatly
     highlight: tango
     number_sections: yes
+    code_folding: show
     toc: yes
     toc_float: 
       collapsed: no
@@ -119,7 +120,7 @@ houses.raw.dim <- dim(houses.raw)
 
 Se han cargado **`r houses.raw.dim[1]` registros** con **`r houses.raw.dim[2]` campos** asociados a cada uno. Así, se muestran **5 registros aleatorios** para comprobar la estructura del conjunto de datos, puesto que si se seleccionan los del principio (*head*) o final (*tail*) todos serán de la misma fuente de datos:
 
-```{r}
+```{r rownames.print=FALSE}
 houses.raw[sample(nrow(houses.raw), 5), ]
 ```
 
@@ -144,7 +145,7 @@ duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
 
 Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar anuncios **procedentes de Fotocasa e Idealista** que contienen la misma vivienda:
 
-```{r}
+```{r rownames.print=FALSE}
 duplicated_integration <- duplicated.houses[duplicated.houses$id == '161630827' | 
                                         duplicated.houses$id == '97136644', 
                                       c('description', 'source', 'location', 'price')]
@@ -154,7 +155,7 @@ duplicated_integration
 
 Por otro lado, se observa como fenómeno que también existen viviendas ofertadas varias veces en el **mismo portal** inmobiliario:
 
-```{r}
+```{r rownames.print=FALSE}
 duplicated_source <- duplicated.houses[duplicated.houses$id == '157307581' | 
                                          duplicated.houses$id == '160123208'| 
                                          duplicated.houses$id == '162766808'|
@@ -197,7 +198,7 @@ Sin registros duplicados, se pasa a la selección de los datos de interés, que 
 
 Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de **selección** de datos realizando también la **transformación** del tipo de datos. Así, a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos y se muestran 5 registros al azar:
 
-```{r}
+```{r rownames.print=FALSE}
 selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>%  
   dplyr::mutate(id = as.integer(id), 
                 location = as.factor(location),
@@ -268,7 +269,7 @@ kable(colSums(is.na(selected.houses)),
 
 Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`** y **`floor`**:
 
-```{r}
+```{r rownames.print=FALSE}
 selected.houses[is.na(selected.houses$id) | 
                   is.na(selected.houses$price) | 
                   is.na(selected.houses$floor),]
@@ -284,7 +285,7 @@ selected.houses <- selected.houses[!is.na(selected.houses$id) &
 
 Se procede ahora a analizar los registros con valores perdidos en el campo **`rooms`** y, para ello, se decide mostrar todos los registros en busca de un patrón:
 
-```{r}
+```{r rownames.print=FALSE}
 selected.houses[is.na(selected.houses$rooms),]
 ```
 
@@ -383,7 +384,7 @@ salamanca.price.m2 <- selected.houses[selected.houses$price.m2 %in%
 
 Tras estudiar los **51 registros** en profundidad, no se encuentra un patrón que pudiera explicar esta situación y los valores del resto de campos son coherentes con el ámbito de este proyecto. Si embargo, sí que se detecta que las tres viviendas con un precio más bajo por metro cuadradado en Villaverde no son tal, sino que se trata de **parcelas** según se explica en el campo **`description`**, por lo que se procede a su eliminación: 
 
-```{r}
+```{r rownames.print=FALSE}
 
 selected.houses[(selected.houses$id == "162471798") | 
                   (selected.houses$id == "159999857") | 
@@ -476,7 +477,7 @@ plot_ly(y = ~ selected.houses$num.photos,
 
 si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en el proceso de captura de los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes corresponde al de una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto: 
 
-```{r}
+```{r rownames.print=FALSE}
 selected.houses[(selected.houses$num.photos = 194),]
 ```
 
