@@ -273,9 +273,11 @@ Se trata de **`r sum(is.na(selected.houses$rooms))` registros** que no tienen va
 ```{r}
 if(length(which(is.na(selected.houses$rooms))) == 
    length(selected.houses$source[selected.houses$source == 'idealista'])){
-  print("El número de viviendas sin valor en 'rooms' SÍ es igual al de procedentes de Idealista.")
+  print(paste0("El número de viviendas sin valor en 'rooms' SÍ es ",
+          "igual al de procedentes de Idealista."))
 } else {
-  print("El número de viviendas sin valor en 'rooms' NO es igual al de procedentes de Idealista.")
+  print(paste0("El número de viviendas sin valor en 'rooms' NO es ",
+          "igual al de procedentes de Idealista."))
 }
 ```
 
@@ -506,20 +508,17 @@ salamanca.houses <- selected.houses[selected.houses$location == "barrio-de-salam
 Además, se crean nuevas variables para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes:
 
 ```{r}
-selected.houses$price.clasification <- as.factor(case_when(
-                          selected.houses$price.m2 <= mean(selected.houses$price.m2) ~ "barato",    
-                          selected.houses$price.m2 > mean(selected.houses$price.m2)  ~ "caro"
-                          )) 
+selected.houses$price.clasification <- as.factor(
+  case_when(selected.houses$price.m2 <= mean(selected.houses$price.m2) ~ "barato",    
+            selected.houses$price.m2 > mean(selected.houses$price.m2)  ~ "caro")) 
 
-villaverde.houses$price.clasification <- as.factor(case_when(
-                          villaverde.houses$price.m2 <= mean(villaverde.houses$price.m2) ~ "barato",    
-                          villaverde.houses$price.m2 > mean(villaverde.houses$price.m2)  ~ "caro"
-                          )) 
+villaverde.houses$price.clasification <- as.factor(
+  case_when(villaverde.houses$price.m2 <= mean(villaverde.houses$price.m2) ~ "barato",    
+            villaverde.houses$price.m2 > mean(villaverde.houses$price.m2)  ~ "caro")) 
 
-salamanca.houses$price.clasification <- as.factor(case_when(
-                          salamanca.houses$price.m2 <= mean(salamanca.houses$price.m2) ~ "barato",    
-                          salamanca.houses$price.m2 > mean(salamanca.houses$price.m2)  ~ "caro"
-                          )) 
+salamanca.houses$price.clasification <- as.factor(
+  case_when(salamanca.houses$price.m2 <= mean(salamanca.houses$price.m2) ~ "barato",
+            salamanca.houses$price.m2 > mean(salamanca.houses$price.m2)  ~ "caro")) 
 ```
 
 ```{r}
@@ -559,24 +558,38 @@ salamanca.houses$height.clasification <- as.factor(case_when(
 Gracias a las variables creadas, se realizan **nuevas agrupaciones** de manera que las viviendas se agrupan además en caras o baratas, grandes o pequeñas y altas o bajas teniendo como referencia para este criterio el barrio en el que se encuentren:
 
 ```{r}
-cheap.houses <- bind_rows(villaverde.houses[villaverde.houses$price.clasification == "barato",],
-                          salamanca.houses[salamanca.houses$price.clasification == "barato",])
-expensive.houses <- bind_rows(villaverde.houses[villaverde.houses$price.clasification == "caro",],
-                              salamanca.houses[salamanca.houses$price.clasification == "caro",])
+cheap.houses <- bind_rows(
+  villaverde.houses[villaverde.houses$price.clasification == "barato",],
+  salamanca.houses[salamanca.houses$price.clasification == "barato",])
+expensive.houses <- bind_rows(
+  villaverde.houses[villaverde.houses$price.clasification == "caro",],
+  salamanca.houses[salamanca.houses$price.clasification == "caro",])
 ```
 
 ```{r}
-small.houses <- bind_rows(villaverde.houses[villaverde.houses$m2.clasification == "pequeño",], 
-                          salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
-big.houses <- bind_rows(villaverde.houses[villaverde.houses$m2.clasification == "grande",], 
-                        salamanca.houses[salamanca.houses$m2.clasification == "grande",])
+small.houses <- bind_rows(
+  villaverde.houses[villaverde.houses$m2.clasification == "pequeño",], 
+  salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
+big.houses <- bind_rows(
+  villaverde.houses[villaverde.houses$m2.clasification == "grande",], 
+  salamanca.houses[salamanca.houses$m2.clasification == "grande",])
 ```
 
 ```{r}
-lower.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clasification == "bajo",], 
-                                 salamanca.houses[salamanca.houses$heigth.clasification == "bajo",])
-upper.floors.houses <- bind_rows(villaverde.houses[villaverde.houses$heigth.clasification == "alto",], 
-                                 salamanca.houses[salamanca.houses$heigth.clasification == "alto",])
+lower.floors.villaverde.houses <- 
+  villaverde.houses[villaverde.houses$height.clasification == "bajo",]
+upper.floors.villaverde.houses <- 
+  villaverde.houses[villaverde.houses$height.clasification == "alto",]
+
+lower.floors.salamanca.houses <- 
+  salamanca.houses[salamanca.houses$height.clasification == "bajo",]
+upper.floors.salamanca.houses <- 
+  salamanca.houses[salamanca.houses$height.clasification == "alto",]
+
+lower.floors.houses <- bind_rows(lower.floors.villaverde.houses, 
+                                 lower.floors.salamanca.houses)
+upper.floors.houses <- bind_rows(upper.floors.villaverde.houses, 
+                                 upper.floors.salamanca.houses)
 ```
 
 ## Comprobación de normalidad y homocedasticidad
@@ -798,6 +811,56 @@ wilcox.test(salamanca.houses$price.m2,
 El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
  
 En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos barrios sea el mismo y se determina que este valor es **significativamente mayor** en el Barrio de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
+
+### ¿Las viviendas más altas son más caras?
+
+La intuición sugiere que, para una vivienda de características idénticas a otra, al situarse en uno de los últimos pisos del edificio su precio sería mayor. Esto se puede reformular como la pregunta del título de la sección, o como: ¿influye la altura de la vivienda en su precio?
+
+Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas altas y bajas. Como ya se ha determinado anteriormente, el precio por m$^2$ entre barrios es significativamente diferente, por lo que se prefiere realizar la investigación en cada barrio de forma separada. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
+
+-  H$_{00}$ : $\mu$ precio por m$^2$ B. Salamanca | alto = $\mu$ precio por m$^2$ B. Salamanca | bajo
+-  H$_{01}$ : $\mu$ precio por m$^2$ B. Salamanca | alto > $\mu$ precio por m$^2$ B. Salamanca | bajo
+
+-  H$_{10}$ : $\mu$ precio por m$^2$ B. Villaverde | alto = $\mu$ precio por m$^2$ B. Villaverde | bajo
+-  H$_{11}$ : $\mu$ precio por m$^2$ B. Villaverde | alto > $\mu$ precio por m$^2$ B. Villaverde | bajo
+
+Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
+
+En consecuencia, se puede realizar un test de hipótesis de dos muestras independientes sobre la media, con distribución normal, unilateral por la derecha y teniendo en cuenta que las varianzas poblacionales son desconocidas y diferentes. Por ello, se opta en primer lugar por la prueba **t de Student**:
+
+```{r}
+t.test(upper.floors.salamanca.houses$price.m2,
+       lower.floors.salamanca.houses$price.m2,
+       alternative = "greater")
+```
+El valor de **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa: el precio por m$^2$ en el barrio de Salamanca es distinto para viviendas en últimas plantas y en viviendas bajas, siendo significativamente superior en vivienda altas.
+
+```{r}
+t.test(upper.floors.villaverde.houses$price.m2,
+       lower.floors.villaverde.houses$price.m2,
+       alternative = "greater")
+```
+El valor de **`p-value`** es 0.06, por encima de $\alpha$ = 0.05, por lo que se **acepta la hipótesis nula** y se rechaza la hipótesis alternativa: el precio por m$^2$ en el barrio de Villaverde es similar para viviendas en últimas plantas y en viviendas bajas.
+
+
+No obstante, si no se hubiera aplicado el teorema del límite central y se hubiera atendido al resultado del test de Lilliefors, se habría tenido que aplicar un **test no paramétrico**. Para verificar la calidad del resultado anterior se realiza el **test de Mann-Whitney**:
+
+```{r}
+wilcox.test(upper.floors.salamanca.houses$price.m2,
+            lower.floors.salamanca.houses$price.m2,
+            alternative = "greater")
+```
+El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
+
+```{r}
+wilcox.test(upper.floors.villaverde.houses$price.m2,
+            lower.floors.villaverde.houses$price.m2,
+            alternative = "greater")
+```
+
+El resultado del **`p-value`** es incluso superior al obtenido por la prueba paramétrica, por lo que se corrobora la decisión de **aceptar la hipótesis nula** y rechazar la hipótesis alternativa.
+ 
+En **conclusión**, la altura de la vivienda tiene influencia en el precio por m$^2$ en el barrio de Salamanca, pero no en el de Villaverde. Por tanto, el precio por metro cuadrado de las viviendas altas en el barrio de Salamanca es superior al precio por metro cuadrado de las viviendas bajas en el mismo barrio; sin embargo, el precio por metro cuadrado de las viviendas altas y bajas en el barrio de Villaverde no se ve influido por la altura de la vivienda. Ambas afirmaciones cuentan con un **nivel de confianza del 95%** en el método.
 
 ### Predicción del precio de una vivienda
 
