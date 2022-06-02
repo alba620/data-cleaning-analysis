@@ -9,7 +9,7 @@ output:
     code_folding: show
     toc: yes
     toc_float: 
-      collapsed: no
+      collapsed: yes
     df_print: paged
   pdf_document:
     toc: yes
@@ -92,15 +92,15 @@ set.seed(seed)
 
 En un contexto en el que el **mercado inmobiliario** vuelve a ser muy volátil tras la crisis de 2008, con una subida generalizada de **precios** en España y el tercer mayor dato de firma de **hipotecas** de la serie histórica en marzo de 2022, según los datos del Instituto Nacional de Estadística (INE), a continuación se presenta un proyecto centrado en este sector. Además, cabe destacar que el mercado inmobiliario en España se ha caracterizado desde hace décadas por las diferencias en el precio de la vivienda, tanto según las zonas del territorio nacional como dentro de las propias localidades.
 
-En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022***](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de [**Idealista**](https://www.idealista.com/) y [**Fotocasa**](https://www.fotocasa.es/es/) en el **distrito más caro (Salamanca)** y el **distrito más barato (Villaverde)** de Madrid, obtenidos en la [**Práctica 1**](https://github.com/plazarotello/web-scraping) de esta asignatura entre el 4 y 7 de abril mediante un proceso de *scraping* debido a que no Existe un registro público de viviendas en venta actualizado. 
+En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022***](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de [**Idealista**](https://www.idealista.com/) y [**Fotocasa**](https://www.fotocasa.es/es/) en el **distrito más caro (Salamanca)** y el **distrito más barato (Villaverde)** de Madrid, obtenidos en la [**Práctica 1**](https://github.com/plazarotello/web-scraping) de esta asignatura entre el 4 y 7 de abril mediante un proceso de *scraping* debido a que no existe un registro público de viviendas en venta actualizado. 
 
 Por tanto, la **Ley por el Derecho a la Vivienda** (decreto del 1 de febrero de 2022) acababa de entrar en vigor y era un momento en el que la **invasión de Rusia a Ucrania** había pillado por sorpresa a todos los sectores de la economía, disparando la **inflación** en España hasta un 9,8 %, según el INE. Del mismo modo, el Banco de España había recortado sus **previsiones de crecimiento** para el país y había doblado su previsión anual de inflación al 7,5 %, según los datos publicados el 5 de abril de 2022.
 
-Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Además, intrínseco a los datos con los que se trabajará, otro de los objetivos será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid.
+Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Esto es consecuencia de que, intrínseco a los datos con los que se trabajará y motivo de su selección, el **objetivo principal** será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid porque el problema sobre el que se sustenta el proyecto es la difencia de precios entre ambos y, de hecho, esa es la **relevancia** del mismo.
 
-En este sentido, aunque en el apartado de [**Selección de datos de interés**] se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
+En este sentido, aunque en el apartado de **[Selección de datos de interés]** se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
 
-Teniendo presente esta descripción inicial del *dataset*, se va a responder a las siguientes preguntas:
+Teniendo presente esta descripción inicial del *dataset* y el objetivo expuesto, se va a responder a las siguientes preguntas:
 
 - ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
 
@@ -170,39 +170,39 @@ duplicated_source <- duplicated.houses[duplicated.houses$id == '157307581' |
                                          duplicated.houses$id == '96890387'|
                                          duplicated.houses$id == '91334123'|
                                          duplicated.houses$id == '96857738',
-                                      c('description', 'source', 'location', 'price')]
+                                      c('source', 'location', 'price', 'description')]
 
 duplicated_source
 ```
 
-Con esta información, se deciden eliminar las **viviendas duplicadas** y, en caso de que se encuentre en ambos sitios web, se mantiene la vivienda de Fotocasa al contener información en el campo `rooms`, asunto que se trabajará más adelante. Fotocasas se selecciona por defecto porque es el primer registro que aparece en el *dataframe* original:
+Con esta información, se deciden eliminar las **viviendas duplicadas** y, en caso de que se encuentre en ambos sitios web, se mantiene la vivienda de Fotocasa al contener información en el campo `rooms`, asunto que se trabajará más adelante. Fotocasa se selecciona por defecto porque es el primer registro que aparece en el *dataframe* original:
 
 ```{r}
 houses.unique = houses.raw[!duplicated(houses.raw$description),]
 ```
 
-## Selección de datos de interés
+## Selección y transformación de datos de interés
 
-Sin registros duplicados, se pasa a la selección de los datos de interés, que conlleva una reducción de la dimensionalidad. Se lista a continuación cada campo, una breve descripción del mismo y si se selecciona o no, así como los motivos de la decisión:
+Sin registros duplicados, se pasa a la selección de los **datos de interés**, que conlleva una **reducción de la dimensionalidad**. Se lista a continuación cada campo, una breve descripción del mismo y si se selecciona o no, así como los motivos de la decisión:
 
-- **`id`**: identificador numérico para cada registro. Actúa como identificador único junto al campo `source`. Se decide mantener los campos identificadores.
-- **`url`**: enlace a la página de venta de la vivienda Se descarta debido a que no se puede obtener más información de la ya obtenida en la práctica anterior y a que los anuncios pueden haber desaparecido.
-- **`title`**: título del anuncio. Se descarta por no ofrecer información adicional.
-- **`location`**: barrio en que se encuentra la vivienda anunciada. Puede ofrecer información relevante sobre la variabilidad de precios en el mercado inmobiliario y permite agrupar los anuncios por zonas. Será importante en la parte de análisis.
-- **`price`**: precio en euros.
-- **`m2`**: metros cuadrados de la vivienda. Permite distinguir el tamaño de las viviendas y realizar agrupaciones.
-- **`price.m2`**: se creará una nueva variable que contenga el valor del precio por metro cuadrado en euros de la vivienda.
-- **`rooms`**: número de habitaciones de la vivienda. Junto a **`m2`** permite describir sus características físicas.
-- **`floor`**: altura a la que se encuentra la vivienda. Ayuda a las descripción de sus características físicas. 
-- **`num.photos`**: número de fotos que acompañan al anuncio. Se puede analizar si existe correlación entre algún tipo de vivienda (caras, baratas, con peores o mejores características) y el número de fotos.
-- **`floor.plan`**: valor lógico que indica si se ha adjuntado el plano de la casa al anuncio.
-- **`view3d`**: valor lógico que indica si el anuncio cuenta con la característica de visión en 3D.
-- **`video`**: valor lógico que indica si el anuncio cuenta con un vídeo de la vivienda
-- **`home.staging`**: valor lógico que indica si el anuncio cuenta con la característica de *home staging*.
-- **`description`**: descripción del cuerpo del anuncio. Se mantiene por si su análisis sirviera de utilidad en el análisis futuro, aunque un análisis textual supera el contexto de la asignatura. 
-- **`description_length`**: se creará un campo nuevo ``description_length`` con el número de palabras contenidas en la descripción para futuros análisis.
-- **`photo_urls`**: lista de los enlaces de las fotografías adjuntas al anuncio. Se descarta por no realizar un análisis de las fotografías.
-- **`source`**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del identificador único de cara registro y sirve, además, para agrupar viviendas.
+- **`id`**: identificador numérico para cada registro. Actúa como identificador único junto al campo `source`. Se decide **mantener** los campos identificadores.
+- **`url`**: enlace a la página de venta de la vivienda. Se **descarta** debido a que no se puede obtener más información de la ya obtenida en la práctica anterior y a que los anuncios pueden haber desaparecido.
+- **`title`**: título del anuncio. Se **descarta** por no ofrecer información adicional.
+- **`location`**: barrio en que se encuentra la vivienda anunciada. Puede ofrecer información relevante sobre la variabilidad de precios en el mercado inmobiliario y permite agrupar los anuncios por zonas. Será **importante** en la parte de análisis.
+- **`price`**: precio en euros. Se **mantiene** porque es una de las variables más importantes del conjunto de datos. 
+- **`m2`**: metros cuadrados de la vivienda. Permite distinguir el tamaño de las viviendas y realizar agrupaciones, por lo que se **mantiene**.
+- **`price.m2`**: se creará una **nueva variable** que contenga el valor del precio por metro cuadrado en euros de la vivienda.
+- **`rooms`**: número de habitaciones de la vivienda. Junto a **`m2`** **permite describir** sus características físicas.
+- **`floor`**: altura a la que se encuentra la vivienda. **Ayuda** a las descripción de sus características físicas. 
+- **`num.photos`**: número de fotos que acompañan al anuncio. Se puede analizar si existe correlación entre algún tipo de vivienda (caras, baratas, con peores o mejores características) y el número de fotos, por lo que se **mantiene**.
+- **`floor.plan`**: valor lógico que indica si se ha adjuntado el plano de la casa al anuncio, por lo que se **mantiene**.
+- **`view3d`**: valor lógico que indica si el anuncio cuenta con la característica de visión en 3D,  por lo que se **mantiene**.
+- **`video`**: valor lógico que indica si el anuncio cuenta con un vídeo de la vivienda,  por lo que se **mantiene**.
+- **`home.staging`**: valor lógico que indica si el anuncio cuenta con la característica de *home staging*,  por lo que se **mantiene**.
+- **`description`**: descripción del cuerpo del anuncio. Se **mantiene** por si su análisis sirviera de utilidad en el análisis futuro, aunque un análisis textual supera el contexto de la asignatura. 
+- **`description_length`**: se creará un **campo nuevo** ``description_length`` con el número de palabras contenidas en la descripción para futuros análisis.
+- **`photo_urls`**: lista de los enlaces de las fotografías adjuntas al anuncio. Se **descarta** por no realizar un análisis de las fotografías.
+- **`source`**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del **identificador único** de cara registro y sirve, además, para agrupar viviendas.
 
 Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de **selección** de datos realizando también la **transformación** del tipo de datos. Así, a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos y se muestran 5 registros al azar:
 
@@ -275,20 +275,32 @@ kable(colSums(is.na(selected.houses)),
     scroll_box(width = "100%", height = "573px")
 ```
 
-Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`** y **`floor`**:
+Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`**, **`m2`**, **`num.photos`**, **`floor.plan`**, **`view3d`**, **`video`**, **`home.staging`** y **`price.m2`**:
 
 ```{r rownames.print=FALSE}
 selected.houses[is.na(selected.houses$id) | 
                   is.na(selected.houses$price) | 
-                  is.na(selected.houses$floor),]
+                  is.na(selected.houses$m2) |
+                  is.na(selected.houses$num.photos) |
+                  is.na(selected.houses$floor.plan) |
+                  is.na(selected.houses$view3d) |
+                  is.na(selected.houses$video) |
+                  is.na(selected.houses$home.staging) |
+                  is.na(selected.houses$price.m2),]
 ```
 
-Solo existe **`r sum(is.na(selected.houses$id))` registro** sin identificador,** `r sum(is.na(selected.houses$price))` registro** sin precio y **`r sum(is.na(selected.houses$floor))`** sin planta. Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide eliminar los registros.
+Dadas las características de los registros (demasiados campos con valores perdidos y otros campos con valores incorrectos en el registro sin identificador) se decide **eliminar los registros**.
 
 ```{r}
 selected.houses <- selected.houses[!is.na(selected.houses$id) & 
                                      !is.na(selected.houses$price) &
-                                     !is.na(selected.houses$floor),]
+                                     !is.na(selected.houses$m2) &
+                                     !is.na(selected.houses$num.photos) &
+                                     !is.na(selected.houses$floor.plan) &
+                                     !is.na(selected.houses$view3d) &
+                                     !is.na(selected.houses$video) &
+                                     !is.na(selected.houses$home.staging) &
+                                     !is.na(selected.houses$price.m2),]
 ```
 
 Se procede ahora a analizar los registros con valores perdidos en el campo **`rooms`** y, para ello, se decide mostrar todos los registros en busca de un patrón:
@@ -297,7 +309,7 @@ Se procede ahora a analizar los registros con valores perdidos en el campo **`ro
 selected.houses[is.na(selected.houses$rooms),]
 ```
 
-Se trata de **`r sum(is.na(selected.houses$rooms))` registros** que no tienen valor en el campo **`rooms`**. Se trata del **`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`%** del total de registros pero, se observa claramente que se trata de viviendas que proceden de **Idealista**. Se verifica dicha suposición:
+Se trata de **`r sum(is.na(selected.houses$rooms))` registros** que no tienen valor en el campo **`rooms`**, es decir, el **`r sum(is.na(selected.houses$rooms))*100.0/selected.houses.dim[1]`%** del total de registros. Sin embargo, se observa claramente que se trata de viviendas que proceden de **Idealista**. Se verifica dicha suposición:
 
 ```{r}
 if(length(which(is.na(selected.houses$rooms))) == 
@@ -354,7 +366,7 @@ salamanca.price <- selected.houses[selected.houses$price %in%
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
-Tras estudiar los 165 registros en profundidad, se descubre que en ambos barrios los viviendas consideradas atípicamente caras también son **muy grandes** para la zona en la que se encuentran:
+Tras estudiar los 165 registros en profundidad, se descubre que en ambos barrios los viviendas consideradas atípicamente caras también son **muy grandes** para la zona en la que se encuentran. A modo de ejemplo, se muestran los metros cuadrados de las viviendas más pequeñas que son consideradas posibles *outliers* en cuanto a su precio:
 
 ```{r}
 min(villaverde.price$m2)
@@ -363,7 +375,7 @@ min(salamanca.price$m2)
 
 Por tanto se decide **no tratar** dichos registros al encontrarse dentro del rango de lo posible en este contexto, como se puede deducir del tamaño mínimo de estas viviendas. 
 
-A continuación se analiza el **precio por metro cuadrado**
+A continuación se analiza el **precio por metro cuadrado**:
 
 ```{r, out.width="100%",out.height ="50%"}
 plot_ly(y = ~ selected.houses$price.m2, 
@@ -483,7 +495,7 @@ plot_ly(y = ~ selected.houses$num.photos,
          title = "Distribución del número de fotografías según el barrio")
 ```
 
-si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en el proceso de captura de los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes corresponde al de una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto: 
+Si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en el proceso de captura de los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes corresponde al de una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto: 
 
 ```{r rownames.print=FALSE}
 selected.houses[(selected.houses$num.photos = 194),]
@@ -503,7 +515,7 @@ plot_ly(y = ~ selected.houses$description.length,
 
 Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000** y la de **Idealista** sube este máximo hasta los **5.000** caracteres, los marcados como posibles *outliers* se consideran registros dentro de lo posible, por lo que se decide mantenerlos sin actuar sobre ellos. 
 
-**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo eran. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, más grandes, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el apartado de Análisis se llegará a conclusiones más precisas.
+**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo eran. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, **más grandes**, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el apartado de [Pruebas estadísticas] se llegará a conclusiones más precisas.
 
 ## Conjunto de datos final
 
