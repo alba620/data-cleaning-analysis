@@ -90,11 +90,17 @@ set.seed(seed)
 
 # Introducción y descripción del *dataset*
 
-El conjunto de datos objeto de análisis de este trabajo es ["*Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022*"](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de Idealista y Fotocasa en el distrito más caro (Salamanca) y el distrito más barato (Villaverde) de Madrid, obtenidos en la Práctica 1 de esta asignatura.
+En un contexto en el que el **mercado inmobiliario** vuelve a ser muy volátil tras la crisis de 2008, con una subida generalizada de **precios** en España y el tercer mayor dato de firma de **hipotecas** de la serie histórica en marzo de 2022, según los datos del Instituto Nacional de Estadística (INE), a continuación se presenta un proyecto centrado en este sector. Además, cabe destacar que el mercado inmobiliario en España se ha caracterizado desde hace décadas por las diferencias en el precio de la vivienda, tanto según las zonas del territorio nacional como dentro de las propias localidades.
 
-A partir de los datos inmobiliarios se pretende encontrar relaciones entre las características físicas de las viviendas; principalmente se investigan las relaciones que puedan tener las otras características con el precio de la vivienda. Además de describir las relaciones entre el precio y las viviendas, se busca realizar una comparativa de la situación del mercado inmobiliario entre ambos distritos.
+En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022***](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de [**Idealista**](https://www.idealista.com/) y [**Fotocasa**](https://www.fotocasa.es/es/) en el **distrito más caro (Salamanca)** y el **distrito más barato (Villaverde)** de Madrid, obtenidos en la [**Práctica 1**](https://github.com/plazarotello/web-scraping) de esta asignatura entre el 4 y 7 de abril mediante un proceso de *scraping* debido a que no Existe un registro público de viviendas en venta actualizado. 
 
-Concretamente, se va a responder a las siguientes preguntas:
+Por tanto, la **Ley por el Derecho a la Vivienda** (decreto del 1 de febrero de 2022) acababa de entrar en vigor y era un momento en el que la **invasión de Rusia a Ucrania** había pillado por sorpresa a todos los sectores de la economía, disparando la **inflación** en España hasta un 9,8 %, según el INE. Del mismo modo, el Banco de España había recortado sus **previsiones de crecimiento** para el país y había doblado su previsión anual de inflación al 7,5 %, según los datos publicados el 5 de abril de 2022.
+
+Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Además, intrínseco a los datos con los que se trabajará, otro de los objetivos será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid.
+
+En este sentido, aunque en el apartado de [**Selección de datos de interés**] se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
+
+Teniendo presente esta descripción inicial del *dataset*, se va a responder a las siguientes preguntas:
 
 - ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
 
@@ -106,7 +112,7 @@ Concretamente, se va a responder a las siguientes preguntas:
 
 Por último, se creará un **modelo de regresión lineal** para predecir el precio de una vivienda dadas sus características físicas (no se tendrán en cuenta las características del anuncio).
 
-La información que se desprenda de este estudio es relevante para **agentes del mercado inmobiliario** -- agencias inmobiliarias, propietarios particulares que buscan vender un inmueble y personas que buscan comprar una vivienda, -- así como para terceros que estén interesados en la situación del mercado inmobiliario en dichas zonas de Madrid. Por último, este estudio también es relevante dentro de los **temas sociales**, como repartición de la riqueza y posibilidad de acceso a la vivienda.
+La información que se desprenda de este estudio es relevante para **agentes del mercado inmobiliario** -- agencias inmobiliarias, propietarios particulares que buscan vender un inmueble y personas que buscan comprar una vivienda --, así como para terceros que estén interesados en la situación del mercado inmobiliario en dichas zonas de Madrid. Por último, este proyecto también es relevante en el **ámbito social**, incluyendo la problemática de la repartición de la riqueza y el derecho de acceso a la vivienda.
 
 # Integración, selección y transformación de datos
 
@@ -148,7 +154,7 @@ Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar 
 ```{r rownames.print=FALSE}
 duplicated_integration <- duplicated.houses[duplicated.houses$id == '161630827' | 
                                         duplicated.houses$id == '97136644', 
-                                      c('description', 'source', 'location', 'price')]
+                                      c('source', 'location', 'price', 'description')]
 
 duplicated_integration
 ```
@@ -174,6 +180,8 @@ Con esta información, se deciden eliminar las **viviendas duplicadas** y, en ca
 ```{r}
 houses.unique = houses.raw[!duplicated(houses.raw$description),]
 ```
+
+## Selección de datos de interés
 
 Sin registros duplicados, se pasa a la selección de los datos de interés, que conlleva una reducción de la dimensionalidad. Se lista a continuación cada campo, una breve descripción del mismo y si se selecciona o no, así como los motivos de la decisión:
 
