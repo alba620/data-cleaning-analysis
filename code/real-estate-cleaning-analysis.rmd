@@ -104,7 +104,7 @@ Teniendo presente esta descripción inicial del *dataset* y el objetivo expuesto
 
 - ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
 
-- ¿Existen diferencias significativas en el precio de la vivienda según el barrio en el que esté localizada? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
+- ¿Existen diferencias significativas en el precio de la vivienda según el distrito en el que esté localizada? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
 
 - ¿Son las viviendas situadas en plantas altas más caras que las viviendas en plantas más cercanas al suelo? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
 
@@ -188,7 +188,7 @@ Sin registros duplicados, se pasa a la selección de los **datos de interés**, 
 - **`id`**: identificador numérico para cada registro. Actúa como identificador único junto al campo `source`. Se decide **mantener** los campos identificadores.
 - **`url`**: enlace a la página de venta de la vivienda. Se **descarta** debido a que no se puede obtener más información de la ya obtenida en la práctica anterior y a que los anuncios pueden haber desaparecido.
 - **`title`**: título del anuncio. Se **descarta** por no ofrecer información adicional.
-- **`location`**: barrio en que se encuentra la vivienda anunciada. Puede ofrecer información relevante sobre la variabilidad de precios en el mercado inmobiliario y permite agrupar los anuncios por zonas. Será **importante** en la parte de análisis.
+- **`location`**: distrito en que se encuentra la vivienda anunciada. Puede ofrecer información relevante sobre la variabilidad de precios en el mercado inmobiliario y permite agrupar los anuncios por zonas. Será **importante** en la parte de análisis.
 - **`price`**: precio en euros. Se **mantiene** porque es una de las variables más importantes del conjunto de datos. 
 - **`m2`**: metros cuadrados de la vivienda. Permite distinguir el tamaño de las viviendas y realizar agrupaciones, por lo que se **mantiene**.
 - **`price.m2`**: se creará una **nueva variable** que contenga el valor del precio por metro cuadrado en euros de la vivienda.
@@ -335,7 +335,7 @@ selected.houses <- droplevels.data.frame(selected.houses)
 
 Tras el trabajo que se ha realizado con los datos, se puede deducir que los **valores extremos**, o *outliers*, solo pueden encontrarse en las variables **`price`**, **`m2`**, **`rooms`**, **`floor`** (en este momento categórica), **`num.photos`**,**`price.m2`** y **`description.length`**.
 
-Como en la primera entrega de este proyecto (Práctica 1) ya se determinó que los barrios de Salamanca y Villaverde de Madrid se encuentran en los extremos de precios dentro de la ciudad según todas las fuentes consultadas, para no distorsionar el análisis de *outliers*, se opta por estudiar cada variable según la **ubicación de la vivienda**. 
+Como en la primera entrega de este proyecto (Práctica 1) ya se determinó que los distritos de Salamanca y Villaverde de Madrid se encuentran en los extremos de precios dentro de la ciudad según todas las fuentes consultadas, para no distorsionar el análisis de *outliers*, se opta por estudiar cada variable según la **ubicación de la vivienda**. 
 
 Para explorar cada uno de los casos, se realiza una aproximación gráfica a cada problema mediante ***boxplots*** o diagramas de caja **interactivos** que facilitan la identificación de los registros, comprensión e identificación, y se decide qué hacer con los candidatos a *outliers*. 
 
@@ -348,8 +348,8 @@ plot_ly(y = ~ selected.houses$price,
         type = "box") %>%
   layout(yaxis = list(type = "log", 
                       title = "Precio en escala logarítmica"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución del precio según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución del precio según el distrito")
 ```
 
 Que haya viviendas caras hasta tal punto que su precio parezca un posible valor extremo equivocado no debe sorprender en este proyecto debido a que el mercado inmobiliario se caracteriza precisamente por ello. En cualquier caso, para verificar que estos **precios son compatibles con la realidad**, se opta por extraer los registros de las viviendas sospechosas:
@@ -366,7 +366,7 @@ salamanca.price <- selected.houses[selected.houses$price %in%
                   selected.houses$location == 'barrio-de-salamanca' ,]
 ```
 
-Tras estudiar los 165 registros en profundidad, se descubre que en ambos barrios los viviendas consideradas atípicamente caras también son **muy grandes** para la zona en la que se encuentran. A modo de ejemplo, se muestran los metros cuadrados de las viviendas más pequeñas que son consideradas posibles *outliers* en cuanto a su precio:
+Tras estudiar los 165 registros en profundidad, se descubre que en ambos distritos los viviendas consideradas atípicamente caras también son **muy grandes** para la zona en la que se encuentran. A modo de ejemplo, se muestran los metros cuadrados de las viviendas más pequeñas que son consideradas posibles *outliers* en cuanto a su precio:
 
 ```{r}
 min(villaverde.price$m2)
@@ -384,11 +384,11 @@ plot_ly(y = ~ selected.houses$price.m2,
         type = "box") %>%
   layout(yaxis = list(type = "log", 
                       title = "Precio por metro cuadrado en escala logarítmica"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución del precio por metro cuadrado según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución del precio por metro cuadrado según el distrito")
 ```
 
-Como en el caso anterior, se extraen los **registros de las viviendas** que tienen un precio atípicamente alto o bajo en relación con sus metros cuadradados para cada uno de los barrios de Madrid analizados:
+Como en el caso anterior, se extraen los **registros de las viviendas** que tienen un precio atípicamente alto o bajo en relación con sus metros cuadradados para cada uno de los distritos de Madrid analizados:
 
 ```{r}
 villaverde.price.m2 <- selected.houses[selected.houses$price.m2 %in% 
@@ -423,11 +423,11 @@ plot_ly(y = ~ selected.houses$m2,
         colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list( title = "Metros cuadrados"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución de los metros cuadrados según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución de los metros cuadrados según el distrito")
 ```
 
-También se extraen los **registros de las viviendas** que tienen un tamaño atípicamente alto para cada uno de los barrios:
+También se extraen los **registros de las viviendas** que tienen un tamaño atípicamente alto para cada uno de los distritos:
 
 ```{r}
 villaverde.m2 <- selected.houses[selected.houses$m2 %in% 
@@ -451,8 +451,8 @@ plot_ly(y = ~ selected.houses$rooms,
         colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list( title = "Número de habitaciones"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución del número de habitaciones según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución del número de habitaciones según el distrito")
 ```
 
 Se sigue el mismo procedimiento que antes, analizando por separado los posibles *outliers* pero, como era de esperar, las **4 viviendas** con más habitaciones también son más grandes, por lo que se decide **no tratar** estos registros.
@@ -477,11 +477,11 @@ plot_ly(y = ~ selected.houses$floor,
         colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Planta"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución de la planta según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución de la planta según el distrito")
 ```
 
-Según los datos del **Catastro** en el Barrio de Salamanca de Madrid **existen edificios** de 12 alturas y en el de Villaverde de 13, e incluso más en ambos casos, aunque no es lo más común. Por tanto, cabe la posibilidad de que las viviendas en venta se encuentren en dichas plantas, por lo que no es necesario profundizar en el análisis de estos datos o los registros completos. 
+Según los datos del **Catastro** en el distrito de Salamanca de Madrid **existen edificios** de 12 alturas y en el de Villaverde de 13, e incluso más en ambos casos, aunque no es lo más común. Por tanto, cabe la posibilidad de que las viviendas en venta se encuentren en dichas plantas, por lo que no es necesario profundizar en el análisis de estos datos o los registros completos. 
 
 En cuanto al **número de fotografías**, los *boxplots* resultantes son los siguientes:
 
@@ -491,8 +491,8 @@ plot_ly(y = ~ selected.houses$num.photos,
         colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Número de fotografías"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución del número de fotografías según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución del número de fotografías según el distrito")
 ```
 
 Si bien es cierto que el número máximo de fotografías en **Fotocasa** es de **30**, este límite asciende hasta **200** en **Idealista**, por lo que nada hace determinar que los valores atípicos sean indicativos de errores en el proceso de captura de los anuncios de las viviendas. De hecho, el anuncio con 194 imágenes corresponde al de una vivienda de casi 3 millones de euros, por lo que tiene sentido que sea el más completo de todos en este aspecto: 
@@ -509,13 +509,13 @@ plot_ly(y = ~ selected.houses$description.length,
         colors = palette.binary,
         type = "box") %>%
   layout(yaxis = list(title = "Longitud de la descripción"), 
-         xaxis = list(title = "'Location' (barrio de la vivienda)"), 
-         title = "Distribución de la longitud del anuncio según el barrio")
+         xaxis = list(title = "'Location' (distrito de la vivienda)"), 
+         title = "Distribución de la longitud del anuncio según el distrito")
 ```
 
 Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000** y la de **Idealista** sube este máximo hasta los **5.000** caracteres, los marcados como posibles *outliers* se consideran registros dentro de lo posible, por lo que se decide mantenerlos sin actuar sobre ellos. 
 
-**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo eran. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **Barrio de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, **más grandes**, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el barrio de **Villaverde** de la capital. En cualquier caso, en el apartado de [Pruebas estadísticas] se llegará a conclusiones más precisas.
+**Este apartado** ha sido útil para descartar la eliminación de posibles *outliers* y verificar la presunta corrección de los datos, excepto tres viviendas que en realidad no lo eran. Además, ha servido para tener una primera aproximación sobre las **características** de las viviendas en función de su localización. Así, aquellas situadas en el **distrito de Salamanca** de Madrid tienden a ser **más caras** en valores absolutos y relativos, **más grandes**, con **más habitaciones** y con **anuncios más completos** (en número de caracteres y fotografías) que las ubicadas en el distrito de **Villaverde** de la capital. En cualquier caso, en el apartado de [Pruebas estadísticas] se llegará a conclusiones más precisas.
 
 ## Conjunto de datos final
 
@@ -542,20 +542,22 @@ write.csv(selected.houses,
 
 # Análisis de los datos
 
-Tras haber seleccionado y limpiado los datos útiles, el siguiente paso consiste en la selección de los grupos de datos y el propio análisis estadístico. En esta fase se particiona el conjunto de datos final según diferentes filtros, ya sea por barrio, precio, altura de la planta en que se encuentran, etcétera.
+Tras haber seleccionado y limpiado los datos útiles, el siguiente paso consiste en la **selección de los grupos de datos** y el propio análisis estadístico. En esta fase se particiona el conjunto de datos final según diferentes filtros, ya sea por distrito, precio, altura de la planta en que se encuentran, etcétera.
 
-Después de seleccionar los grupos de datos relevantes y antes de realizar las pruebas estadísticas, es necesario comprobar la normalidad y homocedasticidad de dichos datos, con el objetivo de escoger adecuadamente los tests estadísticos que aplicar en cada prueba. Por último, se ha de proceder a escoger las pruebas estadísticas que respondan a las preguntas planteadas.
+Después de seleccionar los grupos de datos relevantes y antes de realizar las pruebas estadísticas, es necesario comprobar la **normalidad y homocedasticidad** de dichos datos, con el objetivo de escoger adecuadamente los tests estadísticos que aplicar en cada prueba. Por último, se ha de proceder a escoger las **pruebas estadísticas** que respondan a las preguntas planteadas.
 
 ## Selección de grupos de datos
 
-Teniendo en cuenta los **objetivos** marcados en la introducción y el resultado de las exploraciones realizadas en apartados anteriores, a continuación se **agrupan** las viviendas según el barrio:
+Teniendo en cuenta los **objetivos** marcados en la introducción y el resultado de las exploraciones realizadas en apartados anteriores, a continuación se **agrupan** las viviendas según el distrito:
 
 ```{r}
 villaverde.houses <- selected.houses[selected.houses$location == "villaverde",]
 salamanca.houses <- selected.houses[selected.houses$location == "barrio-de-salamanca",]
 ```
 
-Además, se crean nuevas variables para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes:
+Además, se crean **nuevas variables** que se emplearán para nuevas agrupaciones para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes. En este proyecto no se emplearán todas las agrupaciones necesariamente, pero quedará preparado para ampliar su alcance en el futuro. 
+
+Así, se dividen los datos según si el **precio por metro cuadrado** (`price.m2`) de las viviendas es caro o barato teniendo en cuenta si está por encima o debajo de la media general o del distrito, según el caso:
 
 ```{r}
 selected.houses$price.clasification <- as.factor(
@@ -570,6 +572,8 @@ salamanca.houses$price.clasification <- as.factor(
   case_when(salamanca.houses$price.m2 <= mean(salamanca.houses$price.m2) ~ "barato",
             salamanca.houses$price.m2 > mean(salamanca.houses$price.m2)  ~ "caro")) 
 ```
+
+Se dividen los datos según si el **el tamaño** (`m2`) de las viviendas es pequeño o grande atendiendo a si está por encima o debajo de la media general o del distrito, según el caso:
 
 ```{r}
 selected.houses$m2.clasification <- as.factor(case_when(
@@ -588,6 +592,8 @@ salamanca.houses$m2.clasification <- as.factor(case_when(
                           )) 
 ```
 
+Se dividen los datos según si **la altura** (`floor`) puede considerarse alta o baja. Aunque la Ley de Propiedad Horizontal no deja claro una altura a partir la cual el ascensor sí que es obligatorio, del texto emana que hasta un cuarto piso puede ser tolerable su ausencia mientras que en otros países, como Perú, es obligatorio a partir de la quinta planta incluida. Por tanto, se considera el cuarto como el umbral para que un piso sea considarado "bajo" a efectos de este proyecto: 
+
 ```{r}
 selected.houses$height.clasification <- as.factor(case_when(
                           as.numeric(selected.houses$floor) <= 4 ~ "bajo",    
@@ -605,27 +611,28 @@ salamanca.houses$height.clasification <- as.factor(case_when(
                           )) 
 ```
 
-Gracias a las variables creadas, se realizan **nuevas agrupaciones** de manera que las viviendas se agrupan además en caras o baratas, grandes o pequeñas y altas o bajas teniendo como referencia para este criterio el barrio en el que se encuentren:
+Gracias a las variables creadas, se realizan **nuevas agrupaciones** de manera que las viviendas se agrupan además de por su ubicación, en caras o baratas, grandes o pequeñas y altas o bajas teniendo como referencia el distrito en el que se encuentren. Así, las viviendas con precio por metro cuadrado por encima de su media del distrito de Salamanca y los de Villaverde estarán agrupados juntos, por ejemplo, de manera que se evitan sesgos:
 
 ```{r}
+# Viviendas caras y baratas
 cheap.houses <- bind_rows(
   villaverde.houses[villaverde.houses$price.clasification == "barato",],
   salamanca.houses[salamanca.houses$price.clasification == "barato",])
+
 expensive.houses <- bind_rows(
   villaverde.houses[villaverde.houses$price.clasification == "caro",],
   salamanca.houses[salamanca.houses$price.clasification == "caro",])
-```
 
-```{r}
+# Viviendas pequeñas y grandes
 small.houses <- bind_rows(
   villaverde.houses[villaverde.houses$m2.clasification == "pequeño",], 
   salamanca.houses[salamanca.houses$m2.clasification == "pequeño",])
+
 big.houses <- bind_rows(
   villaverde.houses[villaverde.houses$m2.clasification == "grande",], 
   salamanca.houses[salamanca.houses$m2.clasification == "grande",])
-```
 
-```{r}
+# Viviendas altas y bajas
 lower.floors.villaverde.houses <- 
   villaverde.houses[villaverde.houses$height.clasification == "bajo",]
 upper.floors.villaverde.houses <- 
@@ -644,7 +651,7 @@ upper.floors.houses <- bind_rows(upper.floors.villaverde.houses,
 
 ## Comprobación de normalidad y homocedasticidad
 
-Se procede a comprobar si las variables cuantitativas **`price`**, **`m2`** y **`price.m2`** cumplen los supuestos de normalidad. A su vez, también se comprobará si el precio por $m^2$ cumple el supuesto de homocedasticidad para las viviendas agrupadas por barrio y las viviendas agrupadas por barrio y altura.
+Se procede a comprobar si las variables cuantitativas **`price`**, **`m2`** y **`price.m2`** cumplen los supuestos de normalidad. A su vez, también se comprobará si el precio por $m^2$ cumple el supuesto de homocedasticidad para las viviendas agrupadas por distrito y las viviendas agrupadas por distrito y altura.
 
 ### Normalidad de `price`
 
@@ -705,7 +712,7 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$price.log)
 ```
 
-La variable **`precio`** tampoco sigue una distribución log-normal, según se aprecia tanto en los gráficos (colas muy pesadas en el qqplot) como en el test de Lilliefors (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`precio`** no sigue una distribución normal.
+La variable **`precio`** tampoco sigue una distribución log-normal, según se aprecia tanto en los gráficos (colas muy pesadas en el qqplot) como en el test de Lilliefors (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`precio` no sigue una distribución normal**.
 
 ### Normalidad de `m2`
 
@@ -737,7 +744,7 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$m2)
 ```
 
-Las gráficas muestran que la superficie ($m^2$) de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable **`m2`** no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`m2`** no sigue una distribución normal.
+Las gráficas muestran que la superficie ($m^2$) de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable **`m2`** no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`m2` no sigue una distribución normal**.
 
 ### Normalidad de `price.m2`
 
@@ -769,21 +776,21 @@ ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.75),
 lillie.test(selected.houses$price.m2)
 ```
 
-Las gráficas muestran que el precio por metro cuadrado de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable **`price.m2`** no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`price.m2`** no sigue una distribución normal.
+Las gráficas muestran que el precio por metro cuadrado de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable **`price.m2`** no es normal (p-value < $\alpha$ = 0.05). Se concluye por tanto que la variable **`price.m2` no sigue una distribución normal**.
 
-### Homocedasticidad de `price.m2` por barrios
+### Homocedasticidad de `price.m2` por distritos
 
-Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde. Como los datos no siguen una distribución normal, se ha de utilizar el **test de Fligner-Killeen**, la alternativa no paramétrica al test de Levene.
+Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los distritos de Salamanca y Villaverde. Como los datos no siguen una distribución normal, se ha de utilizar el **test de Fligner-Killeen**, la alternativa no paramétrica al test de Levene.
 
 ```{r}
 fligner.test(price.m2 ~ location, data=selected.houses)
 ```
 
-El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene **varianzas estadísticamente diferentes** para ambos barrios.
+El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene **varianzas estadísticamente diferentes** para ambos distritos.
 
-### Homocedasticidad de `price.m2` por barrios y alturas
+### Homocedasticidad de `price.m2` por distritos y alturas
 
-Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los barrios de Salamanca y Villaverde, según la altura a la que está situada la vivienda. Como los datos no siguen una distribución normal, se ha de utilizar el test de **Fligner-Killeen**, la alternativa no paramétrica al test de Levene.
+Se procede a comprobar la homocedasticidad (también llamada homogeneidad de la varianza) del precio por metro cuadrado entre los distritos de Salamanca y Villaverde, según la altura a la que está situada la vivienda. Como los datos no siguen una distribución normal, se ha de utilizar el test de **Fligner-Killeen**, la alternativa no paramétrica al test de Levene.
 
 ```{r}
 selected.houses.location.height <- selected.houses %>%
@@ -793,7 +800,7 @@ selected.houses.location.height <- selected.houses %>%
 fligner.test(price.m2 ~ location.height.clasification, data=selected.houses.location.height)
 ```
 
-El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene **varianzas estadísticamente diferentes** para ambos barrios y criterios de altura.
+El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se rechaza la hipótesis nula de homocedasticidad y se concluye que el precio por metro cuadrado tiene **varianzas estadísticamente diferentes** para ambos distritos y criterios de altura.
 
 ## Pruebas estadísticas
 
@@ -805,52 +812,126 @@ Se desea saber cuáles de todas las características influye más en el precio f
 
 Se procede a realizar un estudio de las correlaciones entre la variable `price` y el resto de variables numéricas (`m2`, `price.m2`, `description.length`). No se utiliza `num.photos` dado que no todos los registros tienen valores para este campo; sin embargo, se utilizará más adelante para otros propósitos.
 
-Se utiliza el coeficiente de correlación de Spearman, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. Sin embargo, también se van a realizar las pruebas con el coeficiente de correlación de Pearson, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande.
+Se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. Sin embargo, también se van a realizar las pruebas con el coeficiente de correlación de **Pearson**, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande.
 
 ```{r}
 corr.houses <- selected.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
-cor(corr.houses, use='complete.obs', method='spearman')
-cor(corr.houses, use='complete.obs', method='pearson')
+as.data.frame(cor(corr.houses, use='complete.obs', method='spearman'))
+as.data.frame(cor(corr.houses, use='complete.obs', method='pearson'))
 
-cor.test(corr.houses$price, corr.houses$m2, method='spearman')
-cor.test(corr.houses$price, corr.houses$m2, method='pearson')
-cor.test(corr.houses$price, corr.houses$desc.len, method='spearman')
-cor.test(corr.houses$price, corr.houses$desc.len, method='pearson')
-cor.test(corr.houses$price, corr.houses$price.m2, method='spearman')
-cor.test(corr.houses$price, corr.houses$price.m2, method='pearson')
-cor.test(corr.houses$price.m2, corr.houses$m2, method='pearson')
+price.m2.spearman <- cor.test(corr.houses$price, corr.houses$m2, method='spearman')
+price.m2.pearson <- cor.test(corr.houses$price, corr.houses$m2, method='pearson')
+price.desc.len.spearman <-cor.test(corr.houses$price, corr.houses$desc.len, method='spearman')
+price.desc.len.pearson <- cor.test(corr.houses$price, corr.houses$desc.len, method='pearson')
+price.price.m2.spearman <-cor.test(corr.houses$price, corr.houses$price.m2, method='spearman')
+price.price.m2.pearson <- cor.test(corr.houses$price, corr.houses$price.m2, method='pearson')
+price.m2.m2.spearman <-cor.test(corr.houses$price.m2, corr.houses$m2, method='spearman')
+price.m2.m2.pearson <- cor.test(corr.houses$price.m2, corr.houses$m2, method='pearson')
 
-ggcorr(corr.houses, method=c('complete.obs', 'spearman'), name='Corr. coef.',
+# Tabla de resultados
+results.table <- data.frame(Variables = c("Price y m2", 
+                                           "Price y description length", 
+                                           "Price y price.m2",
+                                           "Price.m2 y m2"), 
+                                  Correlación.Pearson = c(price.m2.pearson$estimate,
+                                            price.desc.len.pearson$estimate,
+                                            price.price.m2.pearson$estimate,
+                                            price.m2.m2.pearson$estimate), 
+                            Pvalue.Pearson = c(format(price.m2.pearson$p.value, scientific = TRUE),
+                                            format(price.desc.len.pearson$p.value,scientific = TRUE),
+                                            format(price.price.m2.pearson$p.value,scientific = TRUE),
+                                            format(price.m2.m2.pearson$p.value,scientific = TRUE)),
+                                  Correlación.Spearman= c(price.m2.spearman$estimate,
+                                            price.desc.len.spearman$estimate,
+                                            price.price.m2.spearman$estimate,
+                                            price.m2.m2.spearman$estimate), 
+                            Pvalue.Spearman = c(format(price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.desc.len.spearman$p.value, scientific = TRUE),
+                                            format(price.price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.m2.m2.spearman$p.value,scientific = TRUE)))
+results.table %>% 
+  kable() %>% 
+    kable_styling(bootstrap_options = Form.Basic) %>%
+  kableExtra::scroll_box(width = "100%")
+
+spearman <- ggcorr(corr.houses, method=c('complete.obs', 'spearman'), name='Corr. coef.',
        label=TRUE, label_alpha=TRUE, legend.position='left') +
   title.centered + ggtitle('Matriz de correlaciones (Spearman)') +
   theme(legend.title=element_text(face='bold', size=10))
 
-ggcorr(corr.houses, method=c('complete.obs', 'pearson'), name='Corr. coef.',
+pearson <- ggcorr(corr.houses, method=c('complete.obs', 'pearson'), name='Corr. coef.',
        label=TRUE, label_alpha=TRUE, legend.position='left') +
   title.centered + ggtitle('Matriz de correlaciones (Pearson)') +
   theme(legend.title=element_text(face='bold', size=10))
+
+ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.5),
+          spearman, pearson)
 ```
 
 Todos los resultados se han contrastado mediante un contraste de hipótesis para comprobar su nivel de significancia; con un $\alpha = 0.05$ se puede afirmar que los resultados son estadísticamente significativos tanto con tests paramétricos (coeficiente de correlación de Pearson) como con tests no paramétricos (coeficiente de correlación de Spearman).
 
-Se observa que los m$^2$ de la vivienda son los que más afectan a la hora de decidir el precio de la misma. La longitud de la descripción no tiene una relación lineal con el precio; mientras que el precio por m$^2$ sí que tiene una fuerte correlación con el precio. Este último resultado era esperado, dado que `price.m2` es una variable derivada de `price` y `m2`.
+Se observa que los **m$^2$ de la vivienda son los que más correlación tienen** con el precio de la vivienda. La **longitud de la descripción** no tiene una relación lineal con el precio; mientras que el **precio por m$^2$** sí que tiene una fuerte correlación con el precio. Este último resultado era esperado, dado que `price.m2` es una variable derivada de `price` y `m2`.
 
-Otras conclusiones interesantes que arroja la matriz de correlaciones son las relaciones entre el precio por m$^2$, el precio y los m$^2$. Mientras que se esperaba que la correlación entre `price` y `price.m2` fuera fuertemente positiva, sorprende la débil correlación positiva entre `price.m2` y `m2`, que viene a significar que cuantos más metros cuadrados tenga la vivienda, mayor será el precio por m$^2$. Esto quiere decir que el precio/m$^2$ de una vivienda también se ve afectado por los m$^2$ de la misma de forma positiva; es decir, cuanto más grande sea la vivienda, más caro será el m$^2$ de la misma.
+Otras conclusiones interesantes que arroja la matriz de correlaciones son las relaciones entre el precio por m$^2$, el precio y los m$^2$. Mientras que se esperaba que la correlación entre `price` y `price.m2` fuera fuertemente positiva, sorprende la débil correlación positiva entre `price.m2` y `m2`, que viene a significar que cuantos más metros cuadrados tenga la vivienda, mayor será el precio por m$^2$. Esto quiere decir que el precio/m$^2$ de una vivienda también se ve afectado por los m$^2$ de la misma de forma positiva; es decir, cuanto **más grande sea la vivienda, más caro será el m$^2$** de la misma.
 
-### ¿Existen diferencias en el precio de la vivienda según el barrio?
+### ¿A mayor cantidad de metros cuadrados mayor número de habitaciones?
 
-Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el Barrio de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
+Por otro lado, en cuanto a las características de las viviendas en venta en el distrito de Salamanca y de Villaverde, y todas las viviendas en general, existe la intuición de que a **mayor tamaño en metros cuadrados, mayor número de habitaciones**, pero se quiere verificar esta hipótesis que mucha gente tiene en el imaginario.
 
-Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas de ambos barrios. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
+Para poder confirmar o negar dicha creencia popular, se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. No obstante, también se van a realizar las pruebas con el coeficiente de correlación de **Pearson**, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande:
+
+```{r}
+# Ambos distritos
+all.spearman <- cor.test(selected.houses$rooms, selected.houses$m2, method='spearman')
+all.pearson <- cor.test(selected.houses$rooms, selected.houses$m2, method='pearson')
+
+# Distrito de Salamanca
+salamanca.spearman <- cor.test(salamanca.houses$rooms, salamanca.houses$m2, method='spearman')
+salamanca.pearson <- cor.test(salamanca.houses$rooms, salamanca.houses$m2, method='pearson')
+
+# Distrito de Villaverde
+villaverde.spearman <- cor.test(villaverde.houses$rooms, villaverde.houses$m2, method='spearman')
+villaverde.pearson <- cor.test(villaverde.houses$rooms, villaverde.houses$m2, method='pearson')
+
+# Tabla de resultados
+results.table <- data.frame(Zona = c("Ambos distritos", 
+                                           "Distrito de Salacanca", 
+                                           "Distrito de Villaverde"), 
+                                  Correlación.Pearson = c(all.pearson$estimate,
+                                            salamanca.pearson$estimate,
+                                            villaverde.pearson$estimate), 
+                            Pvalue.Pearson = c(format(all.pearson$p.value, scientific = TRUE),
+                                            format(salamanca.pearson$p.value,scientific = TRUE) ,
+                                            format(villaverde.pearson$p.value,scientific = TRUE)),
+                                  Correlación.Spearman= c(all.spearman$estimate,
+                                            salamanca.spearman$estimate,
+                                            villaverde.spearman$estimate), 
+                            Pvalue.Spearman = c(format(all.spearman$p.value,scientific = TRUE),
+                                            format(salamanca.spearman$p.value, scientific = TRUE),
+                                            format(villaverde.spearman$p.value,scientific = TRUE)))
+results.table %>% 
+  kable() %>% 
+    kable_styling(bootstrap_options = Form.Basic) %>%
+  kableExtra::scroll_box(width = "100%")
+```
+El p-value de todos los test realizados es prácticamente 0, es decir, por debajo del nivel de significancia de $\alpha$ = 0.05 por lo que se puede concluir que en todos los casos el número de habitaciones está **significativametne correlacionado** con el tamaño de las viviendas, con un nivel de confianza en el método del 95%.
+
+En cualquier caso, lo importante a la luz de los resultados es destacar las diferencias entre el distrito de **Salamanca** y el de Villaverde. Mientras en el primero la correlación positiva es de entre un **72 % y un 76 %**, dependiendo de la prueba realizada, en el de **Villaverde es de solo un 35 %**.  
+
+### ¿Existen diferencias en el precio de la vivienda según el distrito?
+
+Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el distrito de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
+
+Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas de ambos distritos. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
 
 -  H$_0$ : $\mu$ precio por m$^2$ B. Salamanca = $\mu$ precio m$^2$ B. Villaverde
 -  H$_1$ : $\mu$ precio por m$^2$ B. Salamanca > $\mu$ precio m$^2$ B. Villaverde
 
 En primer lugar se observa la distribución de los datos por grupos:
 
-```{r fig.height=10, fig.width=10}
+```{r fig.height=6, fig.width=10}
 GGally::ggpairs(dplyr::select(selected.houses, price.m2, location), 
                 mapping=aes(fill=factor(location)),
                 columns=c('price.m2', 'location'), proportions=c(1.5,1),
@@ -861,7 +942,7 @@ GGally::ggpairs(dplyr::select(selected.houses, price.m2, location),
   theme(legend.position='bottom') + title.centered
 ```
 
-El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Salamanca es superior al precio por metro cuadrado del distrito de Villaverde.
+El histograma, el gráfico de densidad y el *boxplot* (cuyo interactivo se puede explorar en [Gestión de *outliers*]) muestran que el precio por metro cuadrado en el distrito de Salamanca es superior al precio por metro cuadrado del distrito de Villaverde.
 
 Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
 
@@ -882,15 +963,16 @@ wilcox.test(salamanca.houses$price.m2,
             villaverde.houses$price.m2,
             alternative = "greater")
 ```
+
 El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
  
-En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos barrios sea el mismo y se determina que este valor es **significativamente mayor** en el Barrio de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
+En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos distritos sea el mismo y se determina que este valor es **significativamente mayor** en el distrito de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
 
 ### ¿Las viviendas más altas son más caras?
 
 La intuición sugiere que, para una vivienda de características idénticas a otra, al situarse en uno de los últimos pisos del edificio su precio sería mayor. Esto se puede reformular como la pregunta del título de la sección, o como: ¿influye la altura de la vivienda en su precio?
 
-Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas altas y bajas. Como ya se ha determinado anteriormente, el precio por m$^2$ entre barrios es significativamente diferente, por lo que se prefiere realizar la investigación en cada barrio de forma separada. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
+Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas altas y bajas. Como ya se ha determinado anteriormente, el precio por m$^2$ entre distritos es significativamente diferente, por lo que se prefiere realizar la investigación en cada distrito de forma separada. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
 
 -  H$_{00}$ : $\mu$ precio por m$^2$ B. Salamanca | alto = $\mu$ precio por m$^2$ B. Salamanca | bajo
 -  H$_{01}$ : $\mu$ precio por m$^2$ B. Salamanca | alto > $\mu$ precio por m$^2$ B. Salamanca | bajo
@@ -900,7 +982,7 @@ Por tanto, la **pregunta de investigación** es si existe una diferencia signifi
 
 En primer lugar se observa la distribución de los datos por grupos, tanto en el distrito de Salamanca como en el de Villaverde:
 
-```{r fig.height=10, fig.width=10}
+```{r fig.height=6, fig.width=10}
 GGally::ggpairs(dplyr::select(salamanca.houses, price.m2, height.clasification), 
                 mapping=aes(fill=factor(height.clasification)),
                 columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
@@ -911,9 +993,9 @@ GGally::ggpairs(dplyr::select(salamanca.houses, price.m2, height.clasification),
   theme(legend.position='bottom') + title.centered
 ```
 
-El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Salamanca es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
+El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el distrito de Salamanca es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
 
-```{r fig.height=10, fig.width=10}
+```{r fig.height=6, fig.width=10}
 GGally::ggpairs(dplyr::select(villaverde.houses, price.m2, height.clasification), 
                 mapping=aes(fill=factor(height.clasification)),
                 columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
@@ -924,7 +1006,7 @@ GGally::ggpairs(dplyr::select(villaverde.houses, price.m2, height.clasification)
   theme(legend.position='bottom') + title.centered
 ```
 
-El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el barrio de Villaverde es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
+El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el distrito de Villaverde es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
 
 Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
 
@@ -935,15 +1017,16 @@ t.test(upper.floors.salamanca.houses$price.m2,
        lower.floors.salamanca.houses$price.m2,
        alternative = "greater")
 ```
-El valor de **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa: el precio por m$^2$ en el barrio de Salamanca es distinto para viviendas en últimas plantas y en viviendas bajas, siendo significativamente superior en vivienda altas.
+
+El valor de **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa: el precio por m$^2$ en el distrito de Salamanca es distinto para viviendas en últimas plantas y en viviendas bajas, siendo significativamente superior en vivienda altas.
 
 ```{r}
 t.test(upper.floors.villaverde.houses$price.m2,
        lower.floors.villaverde.houses$price.m2,
        alternative = "greater")
 ```
-El valor de **`p-value`** es 0.06, por encima de $\alpha$ = 0.05, por lo que se **acepta la hipótesis nula** y se rechaza la hipótesis alternativa: el precio por m$^2$ en el barrio de Villaverde es similar para viviendas en últimas plantas y en viviendas bajas.
 
+El valor de **`p-value`** es 0.06, por encima de $\alpha$ = 0.05, por lo que se **acepta la hipótesis nula** y se rechaza la hipótesis alternativa: el precio por m$^2$ en el distrito de Villaverde es similar para viviendas en últimas plantas y en viviendas bajas.
 
 No obstante, si no se hubiera aplicado el teorema del límite central y se hubiera atendido al resultado del test de Lilliefors, se habría tenido que aplicar un **test no paramétrico**. Para verificar la calidad del resultado anterior se realiza el **test de Mann-Whitney**:
 
@@ -952,6 +1035,7 @@ wilcox.test(upper.floors.salamanca.houses$price.m2,
             lower.floors.salamanca.houses$price.m2,
             alternative = "greater")
 ```
+
 El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
 
 ```{r}
@@ -962,11 +1046,11 @@ wilcox.test(upper.floors.villaverde.houses$price.m2,
 
 El resultado del **`p-value`** es incluso superior al obtenido por la prueba paramétrica, por lo que se corrobora la decisión de **aceptar la hipótesis nula** y rechazar la hipótesis alternativa.
  
-En **conclusión**, la altura de la vivienda tiene influencia en el precio por m$^2$ en el barrio de Salamanca, pero no en el de Villaverde. Por tanto, el precio por metro cuadrado de las viviendas altas en el barrio de Salamanca es superior al precio por metro cuadrado de las viviendas bajas en el mismo barrio; sin embargo, el precio por metro cuadrado de las viviendas altas y bajas en el barrio de Villaverde no se ve influido por la altura de la vivienda. Ambas afirmaciones cuentan con un **nivel de confianza del 95%** en el método.
+En **conclusión**, la **altura de la vivienda tiene influencia** en el precio por m$^2$ en el distrito de **Salamanca**, pero **no en el de Villaverde**. Por tanto, el precio por metro cuadrado de las viviendas altas en el distrito de Salamanca es superior al precio por metro cuadrado de las viviendas bajas en el mismo distrito. Sin embargo, el precio por metro cuadrado de las viviendas altas y bajas en el distrito de Villaverde no se ve influido por la altura de la vivienda. Ambas afirmaciones cuentan con un **nivel de confianza del 95%** en el método.
 
 ### Predicción del precio de una vivienda
 
-Por último, se desea crear un modelo de regresión lineal que permita predecir el precio de una vivienda dadas sus características físicas, es decir, solo aquellas pertenecientes a la vivienda y no al anuncio.
+Por último, se desea crear un modelo de regresión lineal que permita predecir el precio de una vivienda dadas sus **características físicas**, es decir, solo aquellas pertenecientes a la vivienda y no al anuncio, puesto que las viviendas se pueden vender sin ser anunciadas en un portal web.
 
 Para dicho modelo, se va a utilizar la variable `price` como variable dependiente y las variables físicas de la vivienda `location`, `m2` y `floor` como variables independientes. No se utiliza la variable `price.m2` por ser un campo derivado de la variable dependiente. Tampoco se utiliza la variable `rooms` dados los valores perdidos.
 
@@ -974,18 +1058,19 @@ Para dicho modelo, se va a utilizar la variable `price` como variable dependient
 price.prediction.model <- lm(price~location+m2+floor, data=selected.houses)
 summary(price.prediction.model)
 ```
-El modelo de regresión lineal para la predicción del precio de una vivienda dadas sus características físicas es estadísticamente significativo ($p-value < \alpha = 0.05$) y gracias al coeficiente de determinación $R^2$ se sabe que explica un 82% de la variación de precios de las viviendas.
 
-Además, se puede obtener información adicional del modelo. En primer lugar, se observa que si la vivienda se encuentra en el barrio de Villaverde, el precio de la misma baja drásticamente (-352.919,2€ menos que si la vivienda se encontrara en el barrio de Salamanca). Además, como ya se había visto anteriormente en el estudio de correlaciones, cuantos más m$^2$ tenga la vivienda, mayor será su precio.
+El modelo de regresión lineal para la predicción del precio de una vivienda dadas sus características físicas es estadísticamente significativo ($p-value < \alpha = 0.05$) y gracias al coeficiente de determinación $R^2$ se sabe que **explica un 82%** de la variación de precios de las viviendas.
 
-Por último, cabe destacar que tanto los m$^2$ como el barrio donde está situada la vivienda son estadísticamente significativos para el modelo; por otro lado, la planta en que se encuentra no es estadísticamente significativa. Se procede a crear un segundo modelo de regresión lineal sin esta última variable:
+Además, se puede obtener **información adicional** del modelo. En primer lugar, se observa que si la **localización** de la vivienda es el distrito de Villaverde, el precio de la misma baja drásticamente (-352.919,2€ menos que si la vivienda se encontrara en el distrito de Salamanca). Además, como ya se había visto anteriormente en el estudio de correlaciones, cuantos más **m$^2$** tenga la vivienda, mayor será su precio.
+
+Por último, cabe destacar que tanto los m$^2$ como el distrito donde está situada la vivienda son estadísticamente significativos para el modelo. Por otro lado, la **planta** en que se encuentra no es estadísticamente significativa. Se procede a crear un segundo modelo de regresión lineal sin esta última variable:
 
 ```{r}
 price.prediction.model.sub <- lm(price~location+m2, data=selected.houses)
 summary(price.prediction.model.sub)
 ```
 
-Se observa que el modelo sigue siendo estadísticamente significativo, así como los coeficientes de la localización y m$^2$ de la vivienda. El coeficiente de determinación $R^2_1 = 0.813$ frente al coeficiente de determinación del modelo completo $R^2_0 = 0.819$ indica que la planta en que se encuentra la vivienda solo captura un 0.6% de la variación de precios de las viviendas.
+Se observa que el modelo sigue siendo estadísticamente significativo, así como los coeficientes de la localización y m$^2$ de la vivienda. El coeficiente de determinación $R^2_1 = 0.813$ frente al coeficiente de determinación del modelo completo $R^2_0 = 0.819$ indica que la planta en que se encuentra la vivienda solo captura un 0.06% de la variación de precios de las viviendas.
 
 # Conclusiones
 
