@@ -98,7 +98,7 @@ Por tanto, la **Ley por el Derecho a la Vivienda** (decreto del 1 de febrero de 
 
 Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Esto es consecuencia de que, intrínseco a los datos con los que se trabajará y motivo de su selección, el **objetivo principal** será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid porque el problema sobre el que se sustenta el proyecto es la difencia de precios entre ambos y, de hecho, esa es la **relevancia** del mismo.
 
-En este sentido, aunque en el apartado de **[Selección de datos de interés]** se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
+En este sentido, aunque en el apartado de **[Selección y transformación de datos de interés]** se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
 
 Teniendo presente esta descripción inicial del *dataset* y el objetivo expuesto, se va a responder a las siguientes preguntas:
 
@@ -818,9 +818,11 @@ Se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de 
 corr.houses <- selected.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
-as.data.frame(cor(corr.houses, use='complete.obs', method='spearman'))
-as.data.frame(cor(corr.houses, use='complete.obs', method='pearson'))
+# Tabla de correlaciones
+# as.data.frame(cor(corr.houses, use='complete.obs', method='spearman'))
+# as.data.frame(cor(corr.houses, use='complete.obs', method='pearson'))
 
+# Test
 price.m2.spearman <- cor.test(corr.houses$price, corr.houses$m2, method='spearman')
 price.m2.pearson <- cor.test(corr.houses$price, corr.houses$m2, method='pearson')
 price.desc.len.spearman <-cor.test(corr.houses$price, corr.houses$desc.len, method='spearman')
@@ -856,18 +858,26 @@ results.table %>%
     kable_styling(bootstrap_options = Form.Basic) %>%
   kableExtra::scroll_box(width = "100%")
 
-spearman <- ggcorr(corr.houses, method=c('complete.obs', 'spearman'), name='Corr. coef.',
-       label=TRUE, label_alpha=TRUE, legend.position='left') +
+# Correlograma
+spearman <- ggcorr(corr.houses, 
+                   method=c('complete.obs', 'spearman'), 
+                   name='Corr. coef.',
+                   label=TRUE, 
+                   label_alpha=TRUE, 
+                   legend.position='left') +
   title.centered + ggtitle('Matriz de correlaciones (Spearman)') +
   theme(legend.title=element_text(face='bold', size=10))
 
-pearson <- ggcorr(corr.houses, method=c('complete.obs', 'pearson'), name='Corr. coef.',
-       label=TRUE, label_alpha=TRUE, legend.position='left') +
+pearson <- ggcorr(corr.houses, 
+                  method=c('complete.obs', 'pearson'), 
+                  name='Corr. coef.',
+                  label=TRUE, label_alpha=TRUE, 
+                  legend.position='left') +
   title.centered + ggtitle('Matriz de correlaciones (Pearson)') +
   theme(legend.title=element_text(face='bold', size=10))
 
 ggarrange(nrow=1, ncol=2, align='hv', heights=c(1, 0.5),
-          spearman, pearson)
+          pearson, spearman)
 ```
 
 Todos los resultados se han contrastado mediante un contraste de hipótesis para comprobar su nivel de significancia; con un $\alpha = 0.05$ se puede afirmar que los resultados son estadísticamente significativos tanto con tests paramétricos (coeficiente de correlación de Pearson) como con tests no paramétricos (coeficiente de correlación de Spearman).
@@ -875,6 +885,156 @@ Todos los resultados se han contrastado mediante un contraste de hipótesis para
 Se observa que los **m$^2$ de la vivienda son los que más correlación tienen** con el precio de la vivienda. La **longitud de la descripción** no tiene una relación lineal con el precio; mientras que el **precio por m$^2$** sí que tiene una fuerte correlación con el precio. Este último resultado era esperado, dado que `price.m2` es una variable derivada de `price` y `m2`.
 
 Otras conclusiones interesantes que arroja la matriz de correlaciones son las relaciones entre el precio por m$^2$, el precio y los m$^2$. Mientras que se esperaba que la correlación entre `price` y `price.m2` fuera fuertemente positiva, sorprende la débil correlación positiva entre `price.m2` y `m2`, que viene a significar que cuantos más metros cuadrados tenga la vivienda, mayor será el precio por m$^2$. Esto quiere decir que el precio/m$^2$ de una vivienda también se ve afectado por los m$^2$ de la misma de forma positiva; es decir, cuanto **más grande sea la vivienda, más caro será el m$^2$** de la misma.
+
+Sin embargo, estos son resultados generales y, puesto que ya se ha determinado que existen diferencias entre ambos distritos y, de hecho, ese es el interés principal de este proyecto, se procede a realizar el mismo estudio por separado. No se muestra el código por razones de claridad y espacio, pero sí los resultados. En primer lugar se trabaja sobre el **distrito de Salamanca**: 
+
+```{r, echo=FALSE}
+corr.salamanca.houses <- salamanca.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
+  dplyr::rename(desc.len=description.length)
+
+# Tabla de correlaciones
+# as.data.frame(cor(corr.salamanca.houses, use='complete.obs', method='spearman'))
+# as.data.frame(cor(corr.salamanca.houses, use='complete.obs', method='pearson'))
+
+# Test
+price.m2.spearman <- cor.test(corr.salamanca.houses$price, corr.salamanca.houses$m2, method='spearman')
+price.m2.pearson <- cor.test(corr.salamanca.houses$price, corr.salamanca.houses$m2, method='pearson')
+price.desc.len.spearman <-cor.test(corr.salamanca.houses$price, corr.salamanca.houses$desc.len, method='spearman')
+price.desc.len.pearson <- cor.test(corr.salamanca.houses$price, corr.salamanca.houses$desc.len, method='pearson')
+price.price.m2.spearman <-cor.test(corr.salamanca.houses$price, corr.salamanca.houses$price.m2, method='spearman')
+price.price.m2.pearson <- cor.test(corr.salamanca.houses$price, corr.salamanca.houses$price.m2, method='pearson')
+price.m2.m2.spearman <-cor.test(corr.salamanca.houses$price.m2, corr.salamanca.houses$m2, method='spearman')
+price.m2.m2.pearson <- cor.test(corr.salamanca.houses$price.m2, corr.salamanca.houses$m2, method='pearson')
+
+# Tabla de resultados
+results.table.salamanca <- data.frame(Variables = c("Price y m2", 
+                                           "Price y description length", 
+                                           "Price y price.m2",
+                                           "Price.m2 y m2"), 
+                                  Correlación.Pearson = c(price.m2.pearson$estimate,
+                                            price.desc.len.pearson$estimate,
+                                            price.price.m2.pearson$estimate,
+                                            price.m2.m2.pearson$estimate), 
+                            Pvalue.Pearson = c(format(price.m2.pearson$p.value, scientific = TRUE),
+                                            format(price.desc.len.pearson$p.value,scientific = TRUE),
+                                            format(price.price.m2.pearson$p.value,scientific = TRUE),
+                                            format(price.m2.m2.pearson$p.value,scientific = TRUE)),
+                                  Correlación.Spearman= c(price.m2.spearman$estimate,
+                                            price.desc.len.spearman$estimate,
+                                            price.price.m2.spearman$estimate,
+                                            price.m2.m2.spearman$estimate), 
+                            Pvalue.Spearman = c(format(price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.desc.len.spearman$p.value, scientific = TRUE),
+                                            format(price.price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.m2.m2.spearman$p.value,scientific = TRUE)))
+results.table.salamanca %>% 
+  kable(caption="Test de correlación en el distrito de Salamanca") %>% 
+    kable_styling(bootstrap_options = Form.Basic) %>%
+  kableExtra::scroll_box(width = "100%")
+
+# Correlograma
+spearman.salamanca <- ggcorr(corr.salamanca.houses, 
+                             method=c('complete.obs', 'spearman'), 
+                             name='Corr. coef.',
+                             label=TRUE, 
+                             label_alpha=TRUE, 
+                             legend.position='left') +
+  title.centered + ggtitle('Distrito Salamanca (Spearman)') +
+  theme(legend.title=element_text(face='bold', size=10))
+
+pearson.salamanca <- ggcorr(corr.salamanca.houses, 
+                            method=c('complete.obs', 'pearson'), 
+                            name='Corr. coef.',
+                            label=TRUE, 
+                            label_alpha=TRUE, 
+                            legend.position='left') +
+  title.centered + ggtitle('Distrito Salamanca (Pearson)') +
+  theme(legend.title=element_text(face='bold', size=8))
+
+ggarrange(nrow=1, 
+          ncol=2, 
+          align='hv', 
+          heights=c(1, 0.5),
+          pearson.salamanca,
+          spearman.salamanca)
+```
+
+En segundo lugar, se realiza el análisis sobre el **distrito de Villaverde**: 
+
+```{r, echo=FALSE}
+corr.villaverde.houses <- villaverde.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
+  dplyr::rename(desc.len=description.length)
+
+# Tabla de correlaciones
+# as.data.frame(cor(corr.villaverde.houses, use='complete.obs', method='spearman'))
+# as.data.frame(cor(corr.villaverde.houses, use='complete.obs', method='pearson'))
+
+# Test
+price.m2.spearman <- cor.test(corr.villaverde.houses$price, corr.villaverde.houses$m2, method='spearman')
+price.m2.pearson <- cor.test(corr.villaverde.houses$price, corr.villaverde.houses$m2, method='pearson')
+price.desc.len.spearman <-cor.test(corr.villaverde.houses$price, corr.villaverde.houses$desc.len, method='spearman')
+price.desc.len.pearson <- cor.test(corr.villaverde.houses$price, corr.villaverde.houses$desc.len, method='pearson')
+price.price.m2.spearman <-cor.test(corr.villaverde.houses$price, corr.villaverde.houses$price.m2, method='spearman')
+price.price.m2.pearson <- cor.test(corr.villaverde.houses$price, corr.villaverde.houses$price.m2, method='pearson')
+price.m2.m2.spearman <-cor.test(corr.villaverde.houses$price.m2, corr.villaverde.houses$m2, method='spearman')
+price.m2.m2.pearson <- cor.test(corr.villaverde.houses$price.m2, corr.villaverde.houses$m2, method='pearson')
+
+# Tabla de resultados
+results.table.villaverde <- data.frame(Variables = c("Price y m2", 
+                                           "Price y description length", 
+                                           "Price y price.m2",
+                                           "Price.m2 y m2"), 
+                                  Correlación.Pearson = c(price.m2.pearson$estimate,
+                                            price.desc.len.pearson$estimate,
+                                            price.price.m2.pearson$estimate,
+                                            price.m2.m2.pearson$estimate), 
+                            Pvalue.Pearson = c(format(price.m2.pearson$p.value, scientific = TRUE),
+                                            format(price.desc.len.pearson$p.value,scientific = TRUE),
+                                            format(price.price.m2.pearson$p.value,scientific = TRUE),
+                                            format(price.m2.m2.pearson$p.value,scientific = TRUE)),
+                                  Correlación.Spearman= c(price.m2.spearman$estimate,
+                                            price.desc.len.spearman$estimate,
+                                            price.price.m2.spearman$estimate,
+                                            price.m2.m2.spearman$estimate), 
+                            Pvalue.Spearman = c(format(price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.desc.len.spearman$p.value, scientific = TRUE),
+                                            format(price.price.m2.spearman$p.value,scientific = TRUE),
+                                            format(price.m2.m2.spearman$p.value,scientific = TRUE)))
+results.table.villaverde %>% 
+  kable(caption="Test de correlación en el distrito de Villaverde") %>% 
+    kable_styling(bootstrap_options = Form.Basic) %>%
+  kableExtra::scroll_box(width = "100%")
+
+# Correlograma
+spearman.villaverde <- ggcorr(corr.villaverde.houses, 
+                             method=c('complete.obs', 'spearman'), 
+                             name='Corr. coef.',
+                             label=TRUE, 
+                             label_alpha=TRUE, 
+                             legend.position='left') +
+  title.centered + ggtitle('Distrito Villaverde (Spearman)') +
+  theme(legend.title=element_text(face='bold', size=10))
+
+pearson.villaverde <- ggcorr(corr.villaverde.houses, 
+                            method=c('complete.obs', 'pearson'), 
+                            name='Corr. coef.',
+                            label=TRUE, 
+                            label_alpha=TRUE, 
+                            legend.position='left') +
+  title.centered + ggtitle('Distrito Villaverde (Pearson)') +
+  theme(legend.title=element_text(face='bold', size=10))
+
+ggarrange(nrow=1, 
+          ncol=2, 
+          align='hv', 
+          heights=c(1, 0.5),
+          pearson.villaverde,
+          spearman.villaverde)
+```
+
+Como se puede observar, los resultados son algo diferentes atendiendo a la ubicación de las viviendas en venta, aunque se mantiene la conclusión de que todos los resultados son **estadísticamente significativos** independientemente del distrito y test empleado. 
+
+Aunque se puede apreciar en los correlogramas, lo que más destaca respecto a la matriz de correlaciones general es que en el caso del **distito de Salamanca** el tamaño de la vivienda en `m2` tiene una correlación con `price` de entre el 89 % y 91 %, dependiendo del método empleado, mientras que este porcentaje se reduce a entre 81 % y 73 % en el **distrito de Villaverde**. Esto quiere decir,
 
 ### ¿A mayor cantidad de metros cuadrados mayor número de habitaciones?
 
@@ -912,7 +1072,7 @@ results.table <- data.frame(Zona = c("Ambos distritos",
                                             format(salamanca.spearman$p.value, scientific = TRUE),
                                             format(villaverde.spearman$p.value,scientific = TRUE)))
 results.table %>% 
-  kable() %>% 
+  kable(caption="Test de correlación entre metros cuadrados y número de habitaciones") %>% 
     kable_styling(bootstrap_options = Form.Basic) %>%
   kableExtra::scroll_box(width = "100%")
 ```
