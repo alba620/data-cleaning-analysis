@@ -24,6 +24,11 @@ h4 {
   text-align: center;
 }
 
+#TOC {text-align: left}
+
+body {
+text-align: justify}
+
 .table caption {
     color: dimgray;
     font-weight: bold;
