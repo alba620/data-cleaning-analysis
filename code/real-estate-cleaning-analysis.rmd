@@ -101,7 +101,7 @@ En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Hou
 
 Por tanto, la **Ley por el Derecho a la Vivienda** (decreto del 1 de febrero de 2022) acababa de entrar en vigor y era un momento en el que la **invasión de Rusia a Ucrania** había pillado por sorpresa a todos los sectores de la economía, disparando la **inflación** en España hasta un 9,8 %, según el INE. Del mismo modo, el Banco de España había recortado sus **previsiones de crecimiento** para el país y había doblado su previsión anual de inflación al 7,5 %, según los datos publicados el 5 de abril de 2022.
 
-Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Esto es consecuencia de que, intrínseco a los datos con los que se trabajará y motivo de su selección, el **objetivo principal** será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid porque el problema sobre el que se sustenta el proyecto es la difencia de precios entre ambos y, de hecho, esa es la **relevancia** del mismo.
+Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Esto es consecuencia de que, intrínseco a los datos con los que se trabajará y motivo de su selección, el **objetivo principal** será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid porque el problema sobre el que se sustenta el proyecto es la diferencia de precios entre ambos y, de hecho, esa es la **relevancia** del mismo.
 
 En este sentido, aunque en el apartado de **[Selección y transformación de datos de interés]** se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
 
@@ -131,13 +131,13 @@ houses.raw.dim <- dim(houses.raw)
 
 Se han cargado **`r houses.raw.dim[1]` registros** con **`r houses.raw.dim[2]` campos** asociados a cada uno. Así, se muestran **5 registros aleatorios** para comprobar la estructura del conjunto de datos, puesto que si se seleccionan los del principio (*head*) o final (*tail*) todos serán de la misma fuente de datos:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 houses.raw[sample(nrow(houses.raw), 5), ]
 ```
 
 Además, se examina el **tipo de datos** con los que R ha interpretado cada variable:
 
-```{r}
+```{r class.source = 'fold-hide'}
 Form.Basic = c("striped", "hover", "condensed", "responsive")
 kbl(cbind(sapply(houses.raw, class)),
     caption="Tipo de datos de cada variable") %>%
@@ -155,7 +155,7 @@ duplicated.houses <- houses.raw[duplicated(houses.raw$description), ]
 
 Así, por ejemplo, consecuencia del proceso de integración se pueden encontrar anuncios **procedentes de Fotocasa e Idealista** que contienen la misma vivienda:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 duplicated_integration <- duplicated.houses[duplicated.houses$id == '161630827' | 
                                         duplicated.houses$id == '97136644', 
                                       c('source', 'location', 'price', 'description')]
@@ -165,7 +165,7 @@ duplicated_integration
 
 Por otro lado, se observa como fenómeno que también existen viviendas ofertadas varias veces en el **mismo portal** inmobiliario:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 duplicated_source <- duplicated.houses[duplicated.houses$id == '157307581' | 
                                          duplicated.houses$id == '160123208'| 
                                          duplicated.houses$id == '162766808'|
@@ -210,7 +210,7 @@ Sin registros duplicados, se pasa a la selección de los **datos de interés**, 
 
 Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de **selección** de datos realizando también la **transformación** del tipo de datos. Así, a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos y se muestran 5 registros al azar:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 selected.houses <- houses.unique %>% dplyr::select(-url, -title, -photo_urls) %>%  
   dplyr::mutate(id = as.integer(id), 
                 location = as.factor(location),
@@ -270,7 +270,7 @@ levels(selected.houses$floor)
 
 Se procede a realizar un análisis preliminar y superficial de los **valores perdidos** en todos los campos:
 
-```{r}
+```{r class.source = 'fold-hide'}
 kable(colSums(is.na(selected.houses)),
       digits=2, 
       align='l', 
@@ -281,7 +281,7 @@ kable(colSums(is.na(selected.houses)),
 
 Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`**, **`m2`**, **`num.photos`**, **`floor.plan`**, **`view3d`**, **`video`**, **`home.staging`** y **`price.m2`**:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 selected.houses[is.na(selected.houses$id) | 
                   is.na(selected.houses$price) | 
                   is.na(selected.houses$m2) |
@@ -309,7 +309,7 @@ selected.houses <- selected.houses[!is.na(selected.houses$id) &
 
 Se procede ahora a analizar los registros con valores perdidos en el campo **`rooms`** y, para ello, se decide mostrar todos los registros en busca de un patrón:
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 selected.houses[is.na(selected.houses$rooms),]
 ```
 
@@ -345,7 +345,7 @@ Para explorar cada uno de los casos, se realiza una aproximación gráfica a cad
 
 En primer lugar, se analiza el **precio**:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r, out.width="100%",out.height ="50%", class.source = 'fold-hide'}
 plot_ly(y = ~ selected.houses$price, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -381,7 +381,7 @@ Por tanto se decide **no tratar** dichos registros al encontrarse dentro del ran
 
 A continuación se analiza el **precio por metro cuadrado**:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$price.m2, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -408,7 +408,7 @@ salamanca.price.m2 <- selected.houses[selected.houses$price.m2 %in%
 
 Tras estudiar los **51 registros** en profundidad, no se encuentra un patrón que pudiera explicar esta situación y los valores del resto de campos son coherentes con el ámbito de este proyecto. Si embargo, sí que se detecta que las tres viviendas con un precio más bajo por metro cuadradado en Villaverde no son tal, sino que se trata de **parcelas** según se explica en el campo **`description`**, por lo que se procede a su eliminación: 
 
-```{r rownames.print=FALSE}
+```{r rownames.print=FALSE, class.source = 'fold-hide'}
 
 selected.houses[(selected.houses$id == "162471798") | 
                   (selected.houses$id == "159999857") | 
@@ -421,7 +421,7 @@ selected.houses <- subset(selected.houses,
 
 Acabado el análisis sobre el precio, se pasa a estudiar el **tamaño**:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$m2, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -449,7 +449,7 @@ Tras analizar los **122 registros** no se encuentra **ninguna anomalía** que ha
 
 El siguiente paso es analizar el **número de habitaciones** teniendo en cuenta que este dato procede únicamente de las viviendas anunciadas en Fotocasa:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$rooms, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -475,7 +475,7 @@ salamanca.rooms <- selected.houses[selected.houses$rooms %in%
 
 A continuación se visualizan los candidatos a *outliers* según la **planta** en la que se encuentra la vivienda:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$floor, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -489,7 +489,7 @@ Según los datos del **Catastro** en el distrito de Salamanca de Madrid **existe
 
 En cuanto al **número de fotografías**, los *boxplots* resultantes son los siguientes:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$num.photos, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -507,7 +507,7 @@ selected.houses[(selected.houses$num.photos = 194),]
 
 Por úlimo, se evalúa la variable que recoge la longitud de la **descripción en caracteres**:
 
-```{r, out.width="100%",out.height ="50%"}
+```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$description.length, 
         color = ~ selected.houses$location, 
         colors = palette.binary,
@@ -525,7 +525,7 @@ Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000*
 
 Tras este proceso de *data cleaning* o limpieza de datos, el conjunto de datos final tiene las siguientes **características**:
 
-```{r}
+```{r class.source = 'fold-hide'}
 options(knitr.kable.NA = '')
 kable(summary(selected.houses),
       digits=2, 
@@ -661,7 +661,7 @@ Se procede a comprobar si las variables cuantitativas **`price`**, **`m2`** y **
 
 Se procede a realizar las comprobaciones de normalidad en la variable **`price`**, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
-```{r fig.height=5, fig.width=10}
+```{r fig.height=5, fig.width=10, class.source = 'fold-hide'}
 price.n <- length(selected.houses$price)
 price.mean <- mean(selected.houses$price)
 price.sd <- sd(selected.houses$price)
@@ -689,7 +689,7 @@ lillie.test(selected.houses$price)
 
 Las gráficas muestran que el precio de las viviendas no sigue una distribución normal; con el test de normalidad de Lilliefors se confirma que la distribución de la variable **`price`** (precio) no es normal (p-value < $\alpha$ = 0.05). Sin embargo, la variable `precio` parece seguir una distribución log-normal; es decir, el logaritmo del precio puede seguir una distribución normal. Se procede a comprobar dicha hipótesis:
 
-```{r fig.height=5, fig.width=10}
+```{r class.source = 'fold-hide', fig.height=5, fig.width=10}
 selected.houses <- selected.houses %>% plyr::mutate(price.log = log(price))
 price.log.n <- length(selected.houses$price.log)
 price.log.mean <- mean(selected.houses$price.log)
@@ -722,7 +722,7 @@ La variable **`precio`** tampoco sigue una distribución log-normal, según se a
 
 Se procede a realizar las comprobaciones de normalidad en la variable **`m2`**, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
-```{r fig.height=5, fig.width=10}
+```{r class.source = 'fold-hide', fig.height=5, fig.width=10}
 m2.n <- length(selected.houses$m2)
 m2.mean <- mean(selected.houses$m2)
 m2.sd <- sd(selected.houses$m2)
@@ -754,7 +754,7 @@ Las gráficas muestran que la superficie ($m^2$) de las viviendas no sigue una d
 
 Se procede a realizar las comprobaciones de normalidad en la variable **`price.m2`**, utilizando el test de Lilliefors y la ayuda de gráficas auxiliares.
 
-```{r fig.height=5, fig.width=10}
+```{r class.source = 'fold-hide', fig.height=5, fig.width=10}
 price.m2.n <- length(selected.houses$price.m2)
 price.m2.mean <- mean(selected.houses$price.m2)
 price.m2.sd <- sd(selected.houses$price.m2)
@@ -821,7 +821,7 @@ Por tanto, la **pregunta de investigación** es si existe una diferencia signifi
 
 En primer lugar se observa la distribución de los datos por grupos:
 
-```{r fig.height=6, fig.width=10}
+```{r fig.height=6, fig.width=10, class.source = 'fold-hide'}
 GGally::ggpairs(dplyr::select(selected.houses, price.m2, location), 
                 mapping=aes(fill=factor(location)),
                 columns=c('price.m2', 'location'), proportions=c(1.5,1),
@@ -866,7 +866,7 @@ Se procede a realizar un estudio de las correlaciones entre la variable `price` 
 
 Se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. Sin embargo, también se van a realizar las pruebas con el coeficiente de correlación de **Pearson**, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande.
 
-```{r}
+```{r class.source = 'fold-hide'}
 corr.houses <- selected.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
@@ -940,7 +940,7 @@ Otras conclusiones interesantes que arroja la matriz de correlaciones son las re
 
 Sin embargo, estos son resultados generales y, puesto que ya se ha determinado que existen diferencias entre ambos distritos y, de hecho, ese es el interés principal de este proyecto, se procede a realizar el mismo estudio por separado. No se muestra el código por razones de claridad y espacio, pero sí los resultados. En primer lugar se trabaja sobre el **distrito de Salamanca**: 
 
-```{r, echo=FALSE}
+```{r, class.source = 'fold-hide'}
 corr.salamanca.houses <- salamanca.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
@@ -1013,7 +1013,7 @@ ggarrange(nrow=1,
 
 En segundo lugar, se realiza el análisis sobre el **distrito de Villaverde**: 
 
-```{r, echo=FALSE}
+```{r, class.source = 'fold-hide'}
 corr.villaverde.houses <- villaverde.houses %>% dplyr::select(price, m2, price.m2, description.length) %>%
   dplyr::rename(desc.len=description.length)
 
@@ -1094,7 +1094,7 @@ Por otro lado, en cuanto a las características de las viviendas en venta en el 
 
 Para poder confirmar o negar dicha creencia popular, se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. No obstante, también se van a realizar las pruebas con el coeficiente de correlación de **Pearson**, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande:
 
-```{r}
+```{r class.source = 'fold-hide'}
 # Ambos distritos
 all.spearman <- cor.test(selected.houses$rooms, selected.houses$m2, method='spearman')
 all.pearson <- cor.test(selected.houses$rooms, selected.houses$m2, method='pearson')
@@ -1146,7 +1146,7 @@ Por tanto, la **pregunta de investigación** es si existe una diferencia signifi
 
 En primer lugar se observa la distribución de los datos por grupos, tanto en el distrito de Salamanca como en el de Villaverde:
 
-```{r fig.height=6, fig.width=10}
+```{r fig.height=6, fig.width=10, class.source = 'fold-hide'}
 GGally::ggpairs(dplyr::select(salamanca.houses, price.m2, height.clasification), 
                 mapping=aes(fill=factor(height.clasification)),
                 columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
@@ -1159,7 +1159,7 @@ GGally::ggpairs(dplyr::select(salamanca.houses, price.m2, height.clasification),
 
 El histograma, el gráfico de densidad y el *boxplot* muestran que el precio por metro cuadrado en el distrito de Salamanca es aproximadamente el mismo para los inmuebles situados en plantas altas y bajas.
 
-```{r fig.height=6, fig.width=10}
+```{r fig.height=6, fig.width=10, class.source = 'fold-hide'}
 GGally::ggpairs(dplyr::select(villaverde.houses, price.m2, height.clasification), 
                 mapping=aes(fill=factor(height.clasification)),
                 columns=c('price.m2', 'height.clasification'), proportions=c(1.5,1),
