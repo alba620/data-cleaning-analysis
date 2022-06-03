@@ -102,9 +102,9 @@ En este sentido, aunque en el apartado de **[Selección y transformación de dat
 
 Teniendo presente esta descripción inicial del *dataset* y el objetivo expuesto, se va a responder a las siguientes preguntas:
 
-- ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
+- ¿Existen diferencias significativas en el precio de la vivienda por metro cuadrado según el distrito en el que esté localizada? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
 
-- ¿Existen diferencias significativas en el precio de la vivienda según el distrito en el que esté localizada? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
+- ¿Cuáles son las características (de la vivienda y del anuncio) que influyen más en el precio? Para responder esta pregunta se realizará un **análisis de las correlaciones** de las variables numéricas del *dataset*.
 
 - ¿Son las viviendas situadas en plantas altas más caras que las viviendas en plantas más cercanas al suelo? Para responder esta pregunta se realizará un **contraste de hipótesis** con un nivel de significancia $\alpha$ = 0.05.
 
@@ -528,7 +528,7 @@ kable(summary(selected.houses),
       align='l', 
       caption="Datos resumen de cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
-    scroll_box(width = "100%", height = "473px")
+    scroll_box(width = "100%")
 ```
 
 Por último, se guarda el **conjunto de datos final** en un **nuevo fichero**, que también estará disponible en el repositorio público:
@@ -806,6 +806,54 @@ El test de Fligner-Killeen produce un p-value < $\alpha$ = 0.05; por tanto, se r
 
 Tras comprobar que los datos no siguen una distribución normal y no tienen varianzas homogéneas, se concluye que se ha de elegir el test no paramétrico para las pruebas estadísticas correspondientes. Sin embargo, dado que el conjunto de datos tiene un tamaño considerable y las muestras son grandes (n > 30), también se ha de considerar la aplicación del **Teorema del Límite Central** (TLC), que asume una distribución aproximadamente normal y permite el uso de tests paramétricos en las pruebas estadísticas.
 
+### ¿Existen diferencias en el precio de la vivienda según el distrito?
+
+Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el distrito de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
+
+Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas de ambos distritos. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
+
+-  H$_0$ : $\mu$ precio por m$^2$ B. Salamanca = $\mu$ precio m$^2$ B. Villaverde
+-  H$_1$ : $\mu$ precio por m$^2$ B. Salamanca > $\mu$ precio m$^2$ B. Villaverde
+
+En primer lugar se observa la distribución de los datos por grupos:
+
+```{r fig.height=6, fig.width=10}
+GGally::ggpairs(dplyr::select(selected.houses, price.m2, location), 
+                mapping=aes(fill=factor(location)),
+                columns=c('price.m2', 'location'), proportions=c(1.5,1),
+                title='Distribución del precio/m2 por distrito', legend=4,
+                diag=list(continuous = wrap("densityDiag", alpha = 0.75))) +
+  scale_colour_manual(name='Distrito', values=palette) +
+  scale_fill_manual(name='Distrito', values=palette) +
+  theme(legend.position='bottom') + title.centered
+```
+
+El histograma, el gráfico de densidad y el *boxplot* (cuyo interactivo se puede explorar en [Gestión de *outliers*]) muestran que el precio por metro cuadrado en el distrito de Salamanca es superior al precio por metro cuadrado del distrito de Villaverde.
+
+Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
+
+En consecuencia, se puede realizar un test de hipótesis de dos muestras independientes sobre la media, con distribución normal, unilateral por la derecha y teniendo en cuenta que las varianzas poblacionales son desconocidas y diferentes. Por ello, se opta en primer lugar por la prueba **t de Student**:
+
+```{r}
+t.test(salamanca.houses$price.m2,
+       villaverde.houses$price.m2,
+       alternative = "greater")
+```
+
+Como era previsible el valor del **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa.
+
+No obstante, si no se hubiera aplicado el teorema del límite central y se hubiera atendido al resultado del test de Lilliefors, se habría tenido que aplicar un **test no paramétrico**. Para verificar la calidad del resultado anterior se realiza el **test de Mann-Whitney**:
+
+```{r}
+wilcox.test(salamanca.houses$price.m2, 
+            villaverde.houses$price.m2,
+            alternative = "greater")
+```
+
+El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
+ 
+En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos distritos sea el mismo y se determina que este valor es **significativamente mayor** en el distrito de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
+
 ### ¿Qué características influyen más en el precio de la vivienda?
 
 Se desea saber cuáles de todas las características influye más en el precio fijado para la vivienda en el anuncio. Estas características pueden ser tanto de la propia vivienda (m$^2$ o altura) como las características del anuncio (el número de fotos o la longitud de la descripción).
@@ -1080,54 +1128,6 @@ El p-value de todos los test realizados es prácticamente 0, es decir, por debaj
 
 En cualquier caso, lo importante a la luz de los resultados es destacar las diferencias entre el distrito de **Salamanca** y el de Villaverde. Mientras en el primero la correlación positiva es de entre un **72 % y un 76 %**, dependiendo de la prueba realizada, en el de **Villaverde es de solo un 35 %**.  
 
-### ¿Existen diferencias en el precio de la vivienda según el distrito?
-
-Desde la concepción de este proyecto se trabajó sobre la premisa de que la mayor amplitud de diferencia de precios en la ciudad de Madrid se daba entre el distrito de Salamanca y el de Villaverde. Sin embargo, todas las fuentes consultadas evalúan los precios en valores absolutos y, en ese sentido, cabe preguntarse si existe tal **diferencia en valores relativos** respecto al tamaño de las viviendas.
-
-Por tanto, la **pregunta de investigación** es si existe una diferencia significativa en el **precio por metro cuadrado** entre las viviendas de ambos distritos. En consecuencia, se plantean las siguientes **hipótesis nula y alternativa**:  
-
--  H$_0$ : $\mu$ precio por m$^2$ B. Salamanca = $\mu$ precio m$^2$ B. Villaverde
--  H$_1$ : $\mu$ precio por m$^2$ B. Salamanca > $\mu$ precio m$^2$ B. Villaverde
-
-En primer lugar se observa la distribución de los datos por grupos:
-
-```{r fig.height=6, fig.width=10}
-GGally::ggpairs(dplyr::select(selected.houses, price.m2, location), 
-                mapping=aes(fill=factor(location)),
-                columns=c('price.m2', 'location'), proportions=c(1.5,1),
-                title='Distribución del precio/m2 por distrito', legend=4,
-                diag=list(continuous = wrap("densityDiag", alpha = 0.75))) +
-  scale_colour_manual(name='Distrito', values=palette) +
-  scale_fill_manual(name='Distrito', values=palette) +
-  theme(legend.position='bottom') + title.centered
-```
-
-El histograma, el gráfico de densidad y el *boxplot* (cuyo interactivo se puede explorar en [Gestión de *outliers*]) muestran que el precio por metro cuadrado en el distrito de Salamanca es superior al precio por metro cuadrado del distrito de Villaverde.
-
-Como ya se ha estudiado anteriormente, la variable de `price.m2` **no sigue una distribución normal** y se da **heterocedasticidad**. Sin embargo, como el tamaño de las muestras es grande, y aplicando el **teorema del límite central** (TLC), se puede asumir en ambos casos una distribución aproximadamente normal.
-
-En consecuencia, se puede realizar un test de hipótesis de dos muestras independientes sobre la media, con distribución normal, unilateral por la derecha y teniendo en cuenta que las varianzas poblacionales son desconocidas y diferentes. Por ello, se opta en primer lugar por la prueba **t de Student**:
-
-```{r}
-t.test(salamanca.houses$price.m2,
-       villaverde.houses$price.m2,
-       alternative = "greater")
-```
-
-Como era previsible el valor del **`p-value`** es prácticamente 0, muy por debajo de $\alpha$ = 0.05, por lo que se **rechaza la hipótesis nula** en favor de la hipótesis alternativa.
-
-No obstante, si no se hubiera aplicado el teorema del límite central y se hubiera atendido al resultado del test de Lilliefors, se habría tenido que aplicar un **test no paramétrico**. Para verificar la calidad del resultado anterior se realiza el **test de Mann-Whitney**:
-
-```{r}
-wilcox.test(salamanca.houses$price.m2, 
-            villaverde.houses$price.m2,
-            alternative = "greater")
-```
-
-El resultado del **`p-value`** es exactamente el mismo, por lo que se corrobora la decisión de **descartar la hipótesis nula** y aceptar la hipótesis alternativa.
- 
-En **conclusión**, se descarta que el precio por metro cuadrado de las viviendas en ambos distritos sea el mismo y se determina que este valor es **significativamente mayor** en el distrito de Salamanca que en el de Villaverde, con un **nivel de confianza del 95%** en el método.
-
 ### ¿Las viviendas más altas son más caras?
 
 La intuición sugiere que, para una vivienda de características idénticas a otra, al situarse en uno de los últimos pisos del edificio su precio sería mayor. Esto se puede reformular como la pregunta del título de la sección, o como: ¿influye la altura de la vivienda en su precio?
@@ -1233,6 +1233,24 @@ summary(price.prediction.model.sub)
 Se observa que el modelo sigue siendo estadísticamente significativo, así como los coeficientes de la localización y m$^2$ de la vivienda. El coeficiente de determinación $R^2_1 = 0.813$ frente al coeficiente de determinación del modelo completo $R^2_0 = 0.819$ indica que la planta en que se encuentra la vivienda solo captura un 0.06% de la variación de precios de las viviendas.
 
 # Conclusiones
+
+En este proyecto se ha completado el **ciclo de vida de los datos**, desde su captura hasta su análisis y publicación de los resultados. Así, tras todo el proceso con los datos sobre las viviendas en venta en los distritos de Salamanca y Villaverde de Madrid en los portales inmobiliarios de Idealista y Fotocasa entre el 4 y 7 de abril de 2022, ya se está en disposición de exponer las conclusiones a las que se ha ido llegando en la fase de **[Análisis de los datos]**.
+
+En este sentido, hay que tener presente que al inicio de este proyecto centrado en el mercado inmobiliario en un contexto económico y legislativo cambiante del que ya se ha hablado ampliamente, se planteaba el problema principal sobre las **diferencias de precios entre ambos distritos**, puesto que son los que tienen los precios de venta más extremos en la capital. 
+
+Así, se han hecho varios descubrimientos, teniendo en cuenta que todas las conclusiones tienen un 95% de confianza en el método:
+
+- Los **precios por metro cuadrado** son signficativamente mayores en el distrito de Salamanca que en el de Villaverde, con un nivel de confianza del 95% en el método. Esto confirma la hipótesis del proyecto, puesto que las fuentes consultadas tenían en cuenta los precios absolutos y no por metro cuadrado y era necesario verificar la suposición. 
+
+- Se da una mayor **correlación entre precio y tamaño** en el distrito de Salamanca que en el de Villaverde, si bien es cierto que correlación no implica necesariamente causalidad. Además, a mayor tamaño, el **precio por metro cuadrado** también es más elevado en ambas zonas. 
+
+- En cuanto al **tamaño y número de habitaciones** de las viviendas, se da una correlación positiva estadísticamente significativa. Sin emabargo, en el distrito de Salamanca la correlación es de entre un 72 % y un 76 %, dependiendo de la prueba realizada, mientras que en el de Villaverde es de solo un 35 %.
+
+- En el análisis del **precio de la vivienda con respecto a la altura** también se ha encontrado un hallazgo inesperado. En el distrito de Salamanca los pisos altos (por encima de la cuarta planta) son significativamente más caros, pero en el de Villaverde no. 
+
+En **conclusión**, y a la luz de los resultados obtenidos, se puede determinar que lo que **más influye** en la diferencia de precio de una vivienda entre los distritos de Salamanca y Villaverde de Madrid es, precisamente, su **ubicación**, lo que ha quedado confirmado en el modelo de regresión lineal generado para la predicción de precios. 
+
+Como el ciclo de vida de los datos iniciado en este proyecto con la captura es un **proceso iterativo** y debido a que no se han encontrado los motivos que justifiquen tal diferencia de precios entre ambos distritos de Madrid, como **pasos futuros** se propone un análisis más amplio de las diferentes zonas. Por ejemplo, se podrán tener en cuenta **otras características** de las viviendas, como si tienen ascensor, su antigüedad o la necesidad de reforma o mantenimiento. Más allá de esto, todo apunta a que las diferencias se encuentran en los distritos en sí mismos, por lo que sería interesante estudiar otros factores, como los servicios **educativos** públicos y privados en la zona, los servicios **sanitarios** (en Villaverde había protestas a finales de mayo por el cierre de las Urgencias), los servicios para le **tercera edad y personas dependientes**, los **comercios**, el tamaño y estado de las **aceras**, los accesos a las principales **vías de comunicación**, la calidad del **transporte público**, la cercanía con el **centro**, la existencia de **zonas verdes** (el Parque del Retiro se encuentra en el distrito de Salamanca), etc. 
 
 # Tabla de contribuciones
 
