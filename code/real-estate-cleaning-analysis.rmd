@@ -142,8 +142,7 @@ Form.Basic = c("striped", "hover", "condensed", "responsive")
 kbl(cbind(sapply(houses.raw, class)),
     caption="Tipo de datos de cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
-  scroll_box(width = "100%", 
-             height = "573px")
+  scroll_box(width = "100%")
 ```
 
 ## Gestión de elementos duplicados
@@ -277,7 +276,7 @@ kable(colSums(is.na(selected.houses)),
       align='l', 
       caption="Valores nulos en cada variable") %>%
   kable_styling(bootstrap_options = Form.Basic) %>%
-    scroll_box(width = "100%", height = "573px")
+    scroll_box(width = "100%")
 ```
 
 Como se puede observar, el campo `rooms` es el que tiene más valores perdidos, por lo que se tratará más adelante. Así, se visualizan los registros que contienen valores perdidos en las variables **`id`**, **`price`**, **`m2`**, **`num.photos`**, **`floor.plan`**, **`view3d`**, **`video`**, **`home.staging`** y **`price.m2`**:
@@ -1087,7 +1086,7 @@ ggarrange(nrow=1,
 
 Como se puede observar, los resultados son algo diferentes atendiendo a la ubicación de las viviendas en venta, aunque se mantiene la conclusión de que todos los resultados son **estadísticamente significativos** independientemente del distrito y test empleado. 
 
-Aunque se puede apreciar en los correlogramas, lo que más destaca respecto a la matriz de correlaciones general es que en el caso del **distito de Salamanca** el tamaño de la vivienda en `m2` tiene una correlación con `price` de entre el 89 % y 91 %, dependiendo del método empleado, mientras que este porcentaje se reduce a entre 81 % y 73 % en el **distrito de Villaverde**. Esto quiere decir,
+Aunque se puede apreciar en los correlogramas, lo que más destaca respecto a la matriz de correlaciones general es que en el caso del **distito de Salamanca** el tamaño de la vivienda en `m2` tiene una correlación con `price` de entre el 89 % y 91 %, dependiendo del método empleado, mientras que este porcentaje se reduce a entre 81 % y 73 % en el **distrito de Villaverde**.
 
 ### ¿A mayor cantidad de metros cuadrados mayor número de habitaciones?
 
@@ -1110,7 +1109,7 @@ villaverde.pearson <- cor.test(villaverde.houses$rooms, villaverde.houses$m2, me
 
 # Tabla de resultados
 results.table <- data.frame(Zona = c("Ambos distritos", 
-                                           "Distrito de Salacanca", 
+                                           "Distrito de Salamanca", 
                                            "Distrito de Villaverde"), 
                                   Correlación.Pearson = c(all.pearson$estimate,
                                             salamanca.pearson$estimate,
