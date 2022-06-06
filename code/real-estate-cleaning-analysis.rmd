@@ -97,11 +97,11 @@ set.seed(seed)
 
 En un contexto en el que el **mercado inmobiliario** vuelve a ser muy volátil tras la crisis de 2008, con una subida generalizada de **precios** en España y el tercer mayor dato de firma de **hipotecas** de la serie histórica en marzo de 2022, según los datos del Instituto Nacional de Estadística (INE), a continuación se presenta un proyecto centrado en este sector. Además, cabe destacar que el mercado inmobiliario en España se ha caracterizado desde hace décadas por las diferencias en el precio de la vivienda, tanto según las zonas del territorio nacional como dentro de las propias localidades.
 
-En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022***](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de [**Idealista**](https://www.idealista.com/) y [**Fotocasa**](https://www.fotocasa.es/es/) en el **distrito más caro (Salamanca)** y el **distrito más barato (Villaverde)** de Madrid, obtenidos en la [**Práctica 1**](https://github.com/plazarotello/web-scraping) de esta asignatura entre el 4 y 7 de abril mediante un proceso de *scraping* debido a que no existe un registro público de viviendas en venta actualizado. 
+En concreto, el conjunto de datos objeto de análisis de este trabajo es [***Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022***](https://zenodo.org/record/6423459), un *dataset* de las viviendas en venta en los portales inmobiliarios de [**Idealista**](https://www.idealista.com/) y [**Fotocasa**](https://www.fotocasa.es/es/) en el **distrito más caro (Salamanca)** y el **distrito más barato (Villaverde)** de Madrid obtenidos en la [**Práctica 1**](https://github.com/plazarotello/web-scraping) de esta asignatura entre el 4 y 7 de abril mediante un proceso de *scraping* debido a que no existe un registro público de viviendas en venta actualizado. 
 
 Por tanto, la **Ley por el Derecho a la Vivienda** (decreto del 1 de febrero de 2022) acababa de entrar en vigor y era un momento en el que la **invasión de Rusia a Ucrania** había pillado por sorpresa a todos los sectores de la economía, disparando la **inflación** en España hasta un 9,8 %, según el INE. Del mismo modo, el Banco de España había recortado sus **previsiones de crecimiento** para el país y había doblado su previsión anual de inflación al 7,5 %, según los datos publicados el 5 de abril de 2022.
 
-Teniendo en cuenta la situación descrita, a partir de los datos inmobiliarios se pretende encontrar relaciones entre las **características físicas** de las viviendas, así como determinar posibles relaciones de dichas características con su **precio**. Esto es consecuencia de que, intrínseco a los datos con los que se trabajará y motivo de su selección, el **objetivo principal** será la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid porque el problema sobre el que se sustenta el proyecto es la diferencia de precios entre ambos y, de hecho, esa es la **relevancia** del mismo.
+Teniendo en cuenta la situación descrita, el **problema principal** que se aborda en este proyecto es la comparación de la situación del mercado inmobiliario entre los **distritos** de Salamanca y Villaverde de Madrid, la ciudad más poblada de España, para descubrir qué es lo que motiva tal diferencia de valor económico. Así, a partir de los datos inmobiliarios se pretenden encontrar relaciones entre las **características** de las viviendas y determinar posibles relaciones de dichas características con su **precio**.
 
 En este sentido, aunque en el apartado de **[Selección y transformación de datos de interés]** se hace una descripción pormenorizada de todas las variables con las que se trabajará, cabe ser mencionado que todos los registros estarán unívocamente identificados por la tupla **{`id`,`source`}**. Además, se trabajará con variables que contienen información sobre la **localización** de las viviendas, su **precio**, **tamaño**, **número de habitaciones** y **altura** (planta), así como otros atributos que no describen a las viviendas sino los anuncios que las contienen, como el **número de fotografías** y su **descripción**. 
 
@@ -206,7 +206,7 @@ Sin registros duplicados, se pasa a la selección de los **datos de interés**, 
 - **`description`**: descripción del cuerpo del anuncio. Se **mantiene** por si su análisis sirviera de utilidad en el análisis futuro, aunque un análisis textual supera el contexto de la asignatura. 
 - **`description_length`**: se creará un **campo nuevo** ``description_length`` con el número de palabras contenidas en la descripción para futuros análisis.
 - **`photo_urls`**: lista de los enlaces de las fotografías adjuntas al anuncio. Se **descarta** por no realizar un análisis de las fotografías.
-- **`source`**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del **identificador único** de cara registro y sirve, además, para agrupar viviendas.
+- **`source`**: cadena de texto que indica la fuente de la que se ha extraído la información del anuncio. Solo existen los valores "idealista" y "fotocasa". Forma parte del **identificador único** de cada registro y sirve, además, para agrupar viviendas.
 
 Como se ha observado que todos los campos se han codificado como cadenas de caracteres, se optimiza la fase de **selección** de datos realizando también la **transformación** del tipo de datos. Así, a continuación se eliminan las variables descartadas, se crean las nuevas y se transforman los datos y se muestran 5 registros al azar:
 
@@ -241,7 +241,7 @@ str(selected.houses)
 
 # Limpieza de los datos
 
-Tras haber seleccionado los datos útiles, el siguiente paso hacia el análisis consiste en la limpieza y normalización de los datos. En esta fase, es necesario gestionar los registros con valores perdidos o ***missing data***, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los $m^2$) para inspeccionar la existencia de valores extremos o ***outliers***. Sin embargo, tanto en la visualización de registros aleatorios del *dataframe* como en el estudio de la estructura, se ha detectado que hay campos que todavía deben tratarse mediante un proceso de **transformación previa** ya que su resultado puede afectar tanto a la gestión de *missing data* como de *outliers*. 
+Tras haber seleccionado los datos útiles, el siguiente paso hacia el análisis consiste en la limpieza y normalización de los datos, aunque se descarta normalizar al no ser necesario en el tipo de pruebas previstas. En esta fase, es necesario gestionar los registros con valores perdidos o ***missing data***, así como comprobar la distribución de ciertos tipos de datos (por ejemplo, el precio de la vivienda o los $m^2$) para inspeccionar la existencia de valores extremos o ***outliers***. Sin embargo, tanto en la visualización de registros aleatorios del *dataframe* como en el estudio de la estructura, se ha detectado que hay campos que todavía deben tratarse mediante un proceso de **transformación previa** ya que su resultado puede afectar tanto a la gestión de *missing data* como de *outliers*. 
 
 ## Transformaciones previas
 
@@ -505,7 +505,7 @@ Si bien es cierto que el número máximo de fotografías en **Fotocasa** es de *
 selected.houses[(selected.houses$num.photos = 194),]
 ```
 
-Por úlimo, se evalúa la variable que recoge la longitud de la **descripción en caracteres**:
+Por último, se evalúa la variable que recoge la longitud de la **descripción en caracteres**:
 
 ```{r class.source = 'fold-hide', out.height="50%", out.width="100%"}
 plot_ly(y = ~ selected.houses$description.length, 
@@ -514,7 +514,7 @@ plot_ly(y = ~ selected.houses$description.length,
         type = "box") %>%
   layout(yaxis = list(title = "Longitud de la descripción"), 
          xaxis = list(title = "'Location' (distrito de la vivienda)"), 
-         title = "Distribución de la longitud del anuncio según el distrito")
+         title = "Distribución de la longitud de la descripción según el distrito")
 ```
 
 Como según la normativa de **Fotocasa** el máximo de caracteres es de **4.000** y la de **Idealista** sube este máximo hasta los **5.000** caracteres, los marcados como posibles *outliers* se consideran registros dentro de lo posible, por lo que se decide mantenerlos sin actuar sobre ellos. 
@@ -559,7 +559,7 @@ villaverde.houses <- selected.houses[selected.houses$location == "villaverde",]
 salamanca.houses <- selected.houses[selected.houses$location == "barrio-de-salamanca",]
 ```
 
-Además, se crean **nuevas variables** que se emplearán para nuevas agrupaciones para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes. En este proyecto no se emplearán todas las agrupaciones necesariamente, pero quedará preparado para ampliar su alcance en el futuro. 
+Además, se crean **nuevas variables** que se emplearán en nuevas agrupaciones para facilitar la realización de pruebas estadísticas que puedan llevar a conclusiones interesantes. En este proyecto no se emplearán todas las agrupaciones necesariamente, pero quedará preparado para ampliar su alcance en el futuro. 
 
 Así, se dividen los datos según si el **precio por metro cuadrado** (`price.m2`) de las viviendas es caro o barato teniendo en cuenta si está por encima o debajo de la media general o del distrito, según el caso:
 
@@ -596,7 +596,7 @@ salamanca.houses$m2.clasification <- as.factor(case_when(
                           )) 
 ```
 
-Se dividen los datos según si **la altura** (`floor`) puede considerarse alta o baja. Aunque la Ley de Propiedad Horizontal no deja claro una altura a partir la cual el ascensor sí que es obligatorio, del texto emana que hasta un cuarto piso puede ser tolerable su ausencia mientras que en otros países, como Perú, es obligatorio a partir de la quinta planta incluida. Por tanto, se considera el cuarto como el umbral para que un piso sea considarado "bajo" a efectos de este proyecto: 
+Se dividen los datos según si **la altura** (`floor`) puede considerarse alta o baja. Aunque la Ley de Propiedad Horizontal no deja claro una altura a partir la cual el ascensor sí que es obligatorio, del texto emana que hasta un cuarto piso puede ser tolerable su ausencia mientras que en otros países, como Perú, es obligatorio a partir de la quinta planta incluida. Por tanto, se decide que el cuarto sea el umbral para que un piso sea considerado "bajo" a efectos de este proyecto: 
 
 ```{r}
 selected.houses$height.clasification <- as.factor(case_when(
@@ -1090,7 +1090,7 @@ Aunque se puede apreciar en los correlogramas, lo que más destaca respecto a la
 
 ### ¿A mayor cantidad de metros cuadrados mayor número de habitaciones?
 
-Por otro lado, en cuanto a las características de las viviendas en venta en el distrito de Salamanca y de Villaverde, y todas las viviendas en general, existe la intuición de que a **mayor tamaño en metros cuadrados, mayor número de habitaciones**, pero se quiere verificar esta hipótesis que mucha gente tiene en el imaginario.
+Por otro lado, en cuanto a las características de las viviendas en venta en el distrito de Salamanca y de Villaverde, y todas las viviendas en general, existe la intuición de que a **mayor tamaño en metros cuadrados, mayor número de habitaciones**, pero se quiere verificar esta hipótesis que mucha gente tiene en el imaginario a partir de los datos descargados de Fotocasa.
 
 Para poder confirmar o negar dicha creencia popular, se utiliza el coeficiente de correlación de **Spearman**, dado que se trata de un test no paramétrico y es más adecuado para los datos a analizar debido a que no siguen una distribución normal. No obstante, también se van a realizar las pruebas con el coeficiente de correlación de **Pearson**, ya que se puede aplicar el **teorema del límite central** (TLC) sobre la muestra al tener un tamaño suficientemente grande:
 
@@ -1240,11 +1240,11 @@ Se observa que el modelo sigue siendo estadísticamente significativo, así como
 
 En este proyecto se ha completado el **ciclo de vida de los datos**, desde su captura hasta su análisis y publicación de los resultados. Así, tras todo el proceso con los datos sobre las viviendas en venta en los distritos de Salamanca y Villaverde de Madrid en los portales inmobiliarios de Idealista y Fotocasa entre el 4 y 7 de abril de 2022, ya se está en disposición de exponer las conclusiones a las que se ha ido llegando en la fase de **[Análisis de los datos]**.
 
-En este sentido, hay que tener presente que al inicio de este proyecto centrado en el mercado inmobiliario en un contexto económico y legislativo cambiante del que ya se ha hablado ampliamente, se planteaba el problema principal sobre las **diferencias de precios entre ambos distritos**, puesto que son los que tienen los precios de venta más extremos en la capital. 
+En este sentido, hay que tener presente que al inicio de este proyecto centrado en el mercado inmobiliario en un contexto económico y legislativo cambiante del que ya se ha hablado ampliamente, se planteaba el problema principal sobre las **diferencias de precios entre ambos distritos**, puesto que son los que tienen los precios de venta más extremos en la capital, ciudad más poblada de España. 
 
 Así, se han hecho varios descubrimientos, teniendo en cuenta que todas las conclusiones tienen un 95% de confianza en el método:
 
-- Los **precios por metro cuadrado** son signficativamente mayores en el distrito de Salamanca que en el de Villaverde, con un nivel de confianza del 95% en el método. Esto confirma la hipótesis del proyecto, puesto que las fuentes consultadas tenían en cuenta los precios absolutos y no por metro cuadrado y era necesario verificar la suposición. 
+- Los **precios por metro cuadrado** son signficativamente mayores en el distrito de Salamanca que en el de Villaverde. Esto confirma la hipótesis del proyecto, puesto que las fuentes consultadas tenían en cuenta los precios absolutos y no por metro cuadrado y era necesario verificar la suposición. 
 
 - Se da una mayor **correlación entre precio y tamaño** en el distrito de Salamanca que en el de Villaverde, si bien es cierto que correlación no implica necesariamente causalidad. Además, a mayor tamaño, el **precio por metro cuadrado** también es más elevado en ambas zonas. 
 
