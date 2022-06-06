@@ -30,7 +30,7 @@ A continuación, se muestra en árbol la estructura del proyecto.
     ├── code                                        # carpeta con el código R
     |   ├── real-estate.bib                         # bibliografía utilizada
     |   ├── real-estate-cleaning-analysis.rmd       # código en RStudio
-    |   └── uoc.png                                 # png para el informe final
+    |   └── real-estate-cleaning-analysis.html      # HTML generado a partir del código
     |
     ├── data                                        # carpeta con los datasets
     |   ├── real-estate-raw.csv                     # dataset de entrada (raw)
